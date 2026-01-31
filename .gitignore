@@ -1,0 +1,28 @@
+# See https://nextjs.org/docs/app/building-your-application/configuring/mdx
+.next
+.env
+.env*.local
+.vercel
+.output
+node_modules
+
+# next.js build output
+.next/
+
+# vercel build output
+.vercel/
+
+# traditional node_modules
+node_modules/
+
+# Local database
+dev.db
+
+# Prisma
+prisma/client
+
+/lib/generated/prisma
+
+/lib/generated/prisma
+
+/lib/generated/prisma
