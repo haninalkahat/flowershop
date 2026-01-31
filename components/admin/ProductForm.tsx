@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import type { Product } from '@prisma/client';
 
 interface ProductFormProps {
   onSubmit: (product: Product) => void;
@@ -15,16 +16,18 @@ export default function ProductForm({ onSubmit }: ProductFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const newProduct: Product = {
+    const newProduct = {
       id: String(Date.now()), // Placeholder for UUID
       name,
       description,
       imageUrl,
-      originalPrice: originalPrice,
-      discountPrice: discountPrice || null,
+      originalPrice: originalPrice as any, // Cast to any to bypass Decimal type check for mock
+      discountPrice: (discountPrice || null) as any,
+      flowerType: 'Mixed', // Default value
+      stemLength: null,
       createdAt: new Date(),
       updatedAt: new Date(),
-    };
+    } as Product;
     onSubmit(newProduct);
     // Clear form
     setName('');

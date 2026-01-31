@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Product } from '../../app/generated/prisma';
+import { Product } from '@prisma/client';
 
 interface ProductListProps {
   products: Product[];
