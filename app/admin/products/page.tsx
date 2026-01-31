@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import ProductForm from '@/components/admin/ProductForm';
 import ProductList from '@/components/admin/ProductList';
-import { Product } from '../../generated/prisma';
+import type { Product } from '@prisma/client';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
