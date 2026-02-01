@@ -155,7 +155,7 @@ export default function ProductDetailClient({ product }: { product: any }) {
                                                 }`}
                                         >
                                             <div className="w-4 h-4 rounded-full border shadow-sm relative overflow-hidden">
-                                                <Image src={v.imageUrl} alt={v.colorName} fill className="object-cover" />
+                                                <Image src={v.imageUrl} alt={v.colorName} fill className="object-cover" sizes="16px" />
                                             </div>
                                             {v.colorName}
                                         </button>

@@ -126,7 +126,6 @@ export default function Navbar() {
         <div className="md:hidden bg-white border-t border-gray-100 py-4 px-6 space-y-3 shadow-lg absolute w-full left-0 animate-fade-in-up">
           <Link href="/" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>Home</Link>
           <Link href="/about" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>About</Link>
-          <Link href="/company" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>Company</Link>
           <Link href="/contact" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>Contact</Link>
           <Link href="/cart" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>
             Cart ({getTotalItems()})

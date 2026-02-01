@@ -100,12 +100,13 @@ export default function CheckoutPage() {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-3xl">
+        <div className="container mx-auto px-4 py-8 pb-32 md:pb-12 max-w-3xl">
             <h1 className="text-3xl font-serif mb-8 text-center">Checkout & Payment</h1>
 
-            <div className="grid md:grid-cols-2 gap-8">
+            {/* Main Content Grid - Stack on mobile, side-by-side on desktop */}
+            <div className="flex flex-col md:grid md:grid-cols-2 gap-8 mb-8 pb-8">
                 {/* Order Summary */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 order-1 md:order-1">
                     <h2 className="text-xl font-medium mb-4">Order Summary</h2>
                     <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
                         {cart.map((item) => (
@@ -122,7 +123,7 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* Payment Details */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 order-2 md:order-2">
                     <h2 className="text-xl font-medium mb-4">Bank Transfer Details</h2>
                     <div className="space-y-3 text-sm text-gray-700">
                         <div>
@@ -133,13 +134,13 @@ export default function CheckoutPage() {
                             <span className="font-semibold block">Account Holder:</span>
                             {bankDetails.accountHolder}
                         </div>
-                        <div>
-                            <span className="font-semibold block">IBAN:</span>
-                            <div className="flex items-center gap-2 bg-gray-50 p-2 rounded border">
-                                <code className="text-xs break-all">{bankDetails.iban}</code>
+                        <div className="w-full overflow-hidden">
+                            <span className="font-semibold block mb-1">IBAN:</span>
+                            <div className="flex items-center gap-2 bg-gray-50 p-2 rounded border w-full max-w-full">
+                                <code className="text-xs break-all flex-1">{bankDetails.iban}</code>
                                 <button
                                     onClick={() => copyToClipboard(bankDetails.iban)}
-                                    className="p-1 hover:bg-gray-200 rounded transition-colors"
+                                    className="p-2 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
                                     title="Copy IBAN"
                                 >
                                     <Copy size={16} className="text-gray-500" />
@@ -150,15 +151,15 @@ export default function CheckoutPage() {
                 </div>
             </div>
 
-            {/* Upload Section */}
-            <div className="mt-8 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            {/* Upload Section - Full width below */}
+            <div className="mt-4 md:mt-8 bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-20 px-4">
                 <h2 className="text-xl font-medium mb-4">Upload Payment Receipt</h2>
                 <p className="text-sm text-gray-500 mb-4">
                     Please transfer the total amount to the IBAN above and upload a screenshot of the receipt.
                 </p>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-pink-300 transition-colors">
+                <form onSubmit={handleSubmit} className="space-y-4 w-full">
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 md:p-8 text-center hover:border-pink-300 transition-colors w-full">
                         <input
                             type="file"
                             id="receipt"
@@ -166,7 +167,7 @@ export default function CheckoutPage() {
                             onChange={handleFileChange}
                             className="hidden"
                         />
-                        <label htmlFor="receipt" className="cursor-pointer flex flex-col items-center gap-2">
+                        <label htmlFor="receipt" className="cursor-pointer flex flex-col items-center gap-2 w-full justify-center">
                             <Upload className="w-8 h-8 text-gray-400" />
                             <span className="text-sm font-medium text-gray-700">
                                 {receiptFile ? receiptFile.name : 'Click to select receipt image or PDF'}
