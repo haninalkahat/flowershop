@@ -24,8 +24,8 @@ interface CartItem extends Product {
 export interface CartContextType {
   cart: CartItem[];
   addToCart: (product: Product & { selectedColor?: string }, quantity: number) => void;
-  removeFromCart: (productId: string) => void;
-  updateCartItemQuantity: (productId: string, quantity: number) => void;
+  removeFromCart: (productId: string, selectedColor?: string) => void;
+  updateCartItemQuantity: (productId: string, quantity: number, selectedColor?: string) => void;
   clearCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
@@ -58,11 +58,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           const data = await res.json();
           const userCart: CartItem[] = data.cart || [];
 
+
           // Merge logic: combine guest cart with user cart
           if (guestCart.length > 0) {
             // For each guest cart item, add or merge with user cart
             for (const guestItem of guestCart) {
-              const existingItem = userCart.find(item => item.id === guestItem.id);
+              const existingItem = userCart.find(item =>
+                item.id === guestItem.id && item.selectedColor === guestItem.selectedColor
+              );
 
               if (existingItem) {
                 // Item exists in both - update quantity
@@ -71,7 +74,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
                     productId: guestItem.id,
-                    quantity: existingItem.quantity + guestItem.quantity
+                    quantity: existingItem.quantity + guestItem.quantity,
+                    selectedColor: guestItem.selectedColor
                   })
                 });
               } else {
@@ -81,7 +85,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
                     productId: guestItem.id,
-                    quantity: guestItem.quantity
+                    quantity: guestItem.quantity,
+                    selectedColor: guestItem.selectedColor
                   })
                 });
               }
@@ -131,13 +136,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const addToCart = async (product: Product & { selectedColor?: string }, quantity: number) => {
     // Optimistic update
     setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.id === product.id);
+      const existingItem = prevCart.find((item) =>
+        item.id === product.id && item.selectedColor === product.selectedColor
+      );
       if (existingItem) {
         return prevCart.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
+          item.id === product.id && item.selectedColor === product.selectedColor
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
         );
       } else {
-        return [...prevCart, { ...product, quantity }];
+        return [...prevCart, { ...product, quantity, selectedColor: product.selectedColor }];
       }
     });
 
@@ -146,38 +155,46 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         await fetch('/api/cart', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId: product.id, quantity })
+          body: JSON.stringify({
+            productId: product.id,
+            quantity,
+            selectedColor: product.selectedColor
+          })
         });
       } catch (err) {
         console.error("Failed to sync add to cart", err);
-        // Revert optimistic update ideally, but skipping for simplicity
       }
     }
   };
 
-  const removeFromCart = async (productId: string) => {
-    setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
+  const removeFromCart = async (productId: string, selectedColor?: string) => {
+    setCart((prevCart) => prevCart.filter((item) =>
+      !(item.id === productId && item.selectedColor === selectedColor)
+    ));
+
     if (user) {
       await fetch('/api/cart', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId })
+        body: JSON.stringify({ productId, selectedColor })
       });
     }
   };
 
-  const updateCartItemQuantity = async (productId: string, quantity: number) => {
+  const updateCartItemQuantity = async (productId: string, quantity: number, selectedColor?: string) => {
     const newQuantity = Math.max(1, quantity);
     setCart((prevCart) =>
       prevCart.map((item) =>
-        item.id === productId ? { ...item, quantity: newQuantity } : item
+        (item.id === productId && item.selectedColor === selectedColor)
+          ? { ...item, quantity: newQuantity }
+          : item
       )
     );
     if (user) {
       await fetch('/api/cart', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, quantity: newQuantity })
+        body: JSON.stringify({ productId, quantity: newQuantity, selectedColor })
       });
     }
   };
@@ -187,8 +204,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     if (!user) {
       localStorage.removeItem('cart');
     }
-    // If API endpoint for clearing list existed, call it. 
-    // Generally user might just remove all items or checkout.
   };
 
   const getTotalItems = () => {

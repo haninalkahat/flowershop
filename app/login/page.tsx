@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 
@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useAuth();
   const [loading, setLoading] = useState(false);
 
@@ -31,12 +32,9 @@ export default function LoginPage() {
 
       if (res.ok) {
         login(data.user);
-        // Look for returnUrl in query params if implemented, else cart or home
-        // For now, prompt asks to "Redirect them back to checkout process" if they came from there.
-        // We can handle this by checking referrer or generic 'back'.
-        // But for specific logic, simpler is just go to shop or cart.
-        // If I can access query params, I would check ?redirect=/cart
-        router.push(data.redirect || '/');
+
+        const redirectUrl = searchParams.get('redirect') || data.redirect || '/';
+        router.push(redirectUrl);
       } else {
         setError(data.error || 'Login failed');
       }

@@ -25,6 +25,8 @@ export async function GET(request: Request) {
                     fullName: true,
                     email: true,
                     phoneNumber: true,
+                    address: true,
+                    city: true,
                     // Don't SELECT password
                 }
             });

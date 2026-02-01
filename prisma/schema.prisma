@@ -18,7 +18,18 @@ model Product {
   stemLength    Int?
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
+  isFeatured    Boolean    @default(false)
+  variants      ProductVariant[]
   CartItem      CartItem[]
+  OrderItems    OrderItem[]
+}
+
+model ProductVariant {
+  id        String  @id @default(uuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  colorName String
+  imageUrl  String
 }
 
 model User {
@@ -26,11 +37,14 @@ model User {
   fullName    String
   email       String   @unique
   phoneNumber String   @unique
+  address     String?
+  city        String?
   birthYear   Int?
-  password          String
+  password    String
   resetToken        String?
   resetTokenExpiry  DateTime?
   cart              Cart?
+  orders            Order[]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
@@ -50,5 +64,44 @@ model CartItem {
   cart      Cart    @relation(fields: [cartId], references: [id])
   productId String
   product   Product @relation(fields: [productId], references: [id])
-  quantity  Int
+  quantity        Int
+  selectedColor   String?
+}
+
+enum OrderStatus {
+  AWAITING_PAYMENT
+  PAID
+  REJECTED
+  CANCELED
+}
+
+model Order {
+  id          String         @id @default(uuid())
+  userId      String
+  user        User           @relation(fields: [userId], references: [id])
+  items       OrderItem[]
+  totalAmount Decimal
+  status      OrderStatus    @default(AWAITING_PAYMENT)
+  receipt     PaymentReceipt?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model OrderItem {
+  id            String  @id @default(uuid())
+  orderId       String
+  order         Order   @relation(fields: [orderId], references: [id])
+  productId     String
+  product       Product @relation(fields: [productId], references: [id])
+  quantity      Int
+  price         Decimal
+  selectedColor String?
+}
+
+model PaymentReceipt {
+  id        String   @id @default(uuid())
+  orderId   String   @unique
+  order     Order    @relation(fields: [orderId], references: [id])
+  imageUrl  String
+  uploadedAt DateTime @default(now())
 }

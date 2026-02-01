@@ -9,9 +9,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; // In prod, use 
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { email, password, fullName, phoneNumber, birthYear } = body;
+        const { email, password, fullName, phoneNumber, birthYear, address, city } = body;
 
-        if (!email || !password || !fullName) {
+        if (!email || !password || !fullName || !phoneNumber || !address || !city) {
             return NextResponse.json(
                 { error: 'Missing required fields' },
                 { status: 400 }
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
             where: {
                 OR: [
                     { email },
-                    { phoneNumber: phoneNumber || '' }
+                    { phoneNumber }
                 ]
             }
         });
@@ -45,6 +45,8 @@ export async function POST(request: Request) {
                 password: hashedPassword,
                 fullName,
                 phoneNumber,
+                address,
+                city,
                 birthYear: birthYear ? parseInt(birthYear.toString()) : null,
             },
         });

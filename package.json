@@ -25,13 +25,18 @@
     "@tailwindcss/postcss": "^4.1.18",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
+    "@vercel/blob": "^2.0.1",
     "bcryptjs": "^3.0.3",
     "cookies-next": "^6.1.1",
+    "dotenv": "^17.2.3",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.563.0",
     "next": "^16.1.4",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "resend": "^6.9.1"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   }
 }

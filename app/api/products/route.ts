@@ -7,6 +7,7 @@ export async function GET() {
             orderBy: {
                 createdAt: 'desc',
             },
+            include: { variants: true }
         });
 
         return NextResponse.json(products);

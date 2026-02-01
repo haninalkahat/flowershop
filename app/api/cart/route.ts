@@ -32,6 +32,7 @@ export async function GET() {
         cart: cart.items.map(item => ({
             ...item.product,
             quantity: item.quantity,
+            selectedColor: item.selectedColor,
             // Ensure compatibility with Product interface in frontend
             originalPrice: Number(item.product.originalPrice),
             discountPrice: item.product.discountPrice ? Number(item.product.discountPrice) : null,
@@ -39,12 +40,13 @@ export async function GET() {
     });
 }
 
+
 export async function POST(request: Request) {
     const userId = await getUser();
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json();
-    const { productId, quantity } = body;
+    const { productId, quantity, selectedColor } = body;
 
     // Find or create cart
     let cart = await prisma.cart.findUnique({ where: { userId } });
@@ -52,9 +54,13 @@ export async function POST(request: Request) {
         cart = await prisma.cart.create({ data: { userId } });
     }
 
-    // Check if item exists
+    // Check if item exists (match productId AND color)
     const existingItem = await prisma.cartItem.findFirst({
-        where: { cartId: cart.id, productId }
+        where: {
+            cartId: cart.id,
+            productId,
+            selectedColor: selectedColor || null
+        }
     });
 
     if (existingItem) {
@@ -63,12 +69,21 @@ export async function POST(request: Request) {
             data: { quantity: existingItem.quantity + quantity }
         });
     } else {
-        // Check if product exists to avoid FK error (optional but good)
+        // Verify product exists first to avoid P2003 foreign key violation
+        const product = await prisma.product.findUnique({
+            where: { id: productId }
+        });
+
+        if (!product) {
+            return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+        }
+
         await prisma.cartItem.create({
             data: {
                 cartId: cart.id,
                 productId,
-                quantity
+                quantity,
+                selectedColor: selectedColor || null
             }
         });
     }
@@ -81,13 +96,17 @@ export async function PUT(request: Request) {
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json();
-    const { productId, quantity } = body;
+    const { productId, quantity, selectedColor } = body;
 
     const cart = await prisma.cart.findUnique({ where: { userId } });
     if (!cart) return NextResponse.json({ error: 'Cart not found' }, { status: 404 });
 
     const existingItem = await prisma.cartItem.findFirst({
-        where: { cartId: cart.id, productId }
+        where: {
+            cartId: cart.id,
+            productId,
+            selectedColor: selectedColor || null
+        }
     });
 
     if (existingItem) {
@@ -109,13 +128,17 @@ export async function DELETE(request: Request) {
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json();
-    const { productId } = body; // Simplified: remove by productId
+    const { productId, selectedColor } = body;
 
     const cart = await prisma.cart.findUnique({ where: { userId } });
     if (!cart) return NextResponse.json({ error: 'Cart not found' }, { status: 404 });
 
     const existingItem = await prisma.cartItem.findFirst({
-        where: { cartId: cart.id, productId }
+        where: {
+            cartId: cart.id,
+            productId,
+            selectedColor: selectedColor || null
+        }
     });
 
     if (existingItem) {

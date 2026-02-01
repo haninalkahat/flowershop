@@ -1,38 +1,46 @@
+
 import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
+import prisma from '@/lib/prisma';
 import { Product } from '@/context/CartContext';
 
-const products: Product[] = [
-  {
-    id: '1',
-    name: 'Romantic Roses',
-    description: 'Classic elegance for your loved ones.',
-    imageUrl: '/flower-red.jpg',
-    originalPrice: 29.99,
-    discountPrice: null,
-    flowerType: 'Roses',
-  },
-  {
-    id: '2',
-    name: 'Sunny Sunflowers',
-    description: 'Brighten any room with these cheerful blooms.',
-    imageUrl: '/flower-blue.jpg',
-    originalPrice: 24.99,
-    discountPrice: null,
-    flowerType: 'Sunflowers',
-  },
-  {
-    id: '3',
-    name: 'Elegant Lilies',
-    description: 'Sophistication and grace in every petal.',
-    imageUrl: '/flower-pink.jpg',
-    originalPrice: 34.99,
-    discountPrice: null,
-    flowerType: 'Lilies',
-  },
-];
+// Force dynamic if we want real-time updates without build
+export const dynamic = 'force-dynamic';
 
-export default function Home() {
+export default async function Home() {
+
+  // Fetch Featured Products
+  const featuredDb = await prisma.product.findMany({
+    where: { isFeatured: true },
+    take: 3,
+    orderBy: { createdAt: 'desc' }
+  });
+
+  // Fallback if no featured products, get latest 3
+  let productsToDisplay = featuredDb;
+  if (productsToDisplay.length < 3) {
+    const remaining = 3 - productsToDisplay.length;
+    const additional = await prisma.product.findMany({
+      where: {
+        id: { notIn: productsToDisplay.map(p => p.id) }
+      },
+      take: remaining,
+      orderBy: { createdAt: 'desc' }
+    });
+    productsToDisplay = [...productsToDisplay, ...additional];
+  }
+
+  // Transform for UI (Decimal to Number)
+  const products: Product[] = productsToDisplay.map(p => ({
+    id: p.id,
+    name: p.name,
+    description: p.description || '',
+    imageUrl: p.imageUrl,
+    originalPrice: Number(p.originalPrice),
+    discountPrice: p.discountPrice ? Number(p.discountPrice) : null,
+    flowerType: p.flowerType,
+  }));
+
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
@@ -63,11 +71,17 @@ export default function Home() {
       {/* Product Grid */}
       <section className="container mx-auto py-16 px-4">
         <h2 className="text-4xl font-bold text-center text-pink-700 mb-12 font-serif">Our Beautiful Blooms</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {products.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center text-gray-500 text-lg">
+            No products currently available or featured.
+          </div>
+        )}
       </section>
     </main>
   );

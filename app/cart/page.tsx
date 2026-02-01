@@ -13,10 +13,9 @@ export default function CartPage() {
 
   const handleCheckout = () => {
     if (!user) {
-      router.push('/login?redirect=/cart');
+      router.push('/login?redirect=/checkout');
     } else {
-      // Proceed to checkout (for now just alert or log)
-      alert("Proceeding to checkout for " + user.fullName);
+      router.push('/checkout');
     }
   };
 
@@ -49,8 +48,10 @@ export default function CartPage() {
 
         {cart.map((item) => {
           const price = item.discountPrice !== null ? item.discountPrice : item.originalPrice;
+          const key = `${item.id}-${item.selectedColor || 'default'}`;
+
           return (
-            <div key={item.id} className="grid grid-cols-1 md:grid-cols-6 gap-6 md:gap-4 p-6 border-b border-gray-100 items-center">
+            <div key={key} className="grid grid-cols-1 md:grid-cols-6 gap-6 md:gap-4 p-6 border-b border-gray-100 items-center">
               {/* Product Info */}
               <div className="col-span-3 flex items-center space-x-4">
                 <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-50 border border-gray-100">
@@ -64,6 +65,9 @@ export default function CartPage() {
                 <div>
                   <h3 className="font-semibold text-lg text-gray-800">{item.name}</h3>
                   <p className="text-sm text-gray-500 truncate max-w-xs">{item.description}</p>
+                  {item.selectedColor && (
+                    <p className="text-xs text-gray-500 mt-1">Color: <span className="font-medium text-gray-700">{item.selectedColor}</span></p>
+                  )}
                 </div>
               </div>
 
@@ -79,9 +83,9 @@ export default function CartPage() {
                   onClick={() => {
                     const newQuantity = item.quantity - 1;
                     if (newQuantity <= 0) {
-                      removeFromCart(item.id);
+                      removeFromCart(item.id, item.selectedColor);
                     } else {
-                      updateCartItemQuantity(item.id, newQuantity);
+                      updateCartItemQuantity(item.id, newQuantity, item.selectedColor);
                     }
                   }}
                   className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 hover:bg-pink-100 hover:text-pink-600 flex items-center justify-center transition-colors font-bold"
@@ -90,7 +94,7 @@ export default function CartPage() {
                 </button>
                 <span className="font-semibold w-6 text-center">{item.quantity}</span>
                 <button
-                  onClick={() => updateCartItemQuantity(item.id, item.quantity + 1)}
+                  onClick={() => updateCartItemQuantity(item.id, item.quantity + 1, item.selectedColor)}
                   className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 hover:bg-pink-100 hover:text-pink-600 flex items-center justify-center transition-colors font-bold"
                 >
                   +

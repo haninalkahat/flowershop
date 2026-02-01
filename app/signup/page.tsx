@@ -10,6 +10,8 @@ export default function SignupPage() {
         fullName: '',
         email: '',
         phone: '',
+        address: '',
+        city: '',
         birthYear: '',
         password: '',
     });
@@ -38,6 +40,8 @@ export default function SignupPage() {
                     password: formData.password,
                     fullName: formData.fullName,
                     phoneNumber: formData.phone,
+                    address: formData.address,
+                    city: formData.city,
                     birthYear: formData.birthYear,
                 }),
             });
@@ -101,6 +105,26 @@ export default function SignupPage() {
                             className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
                             placeholder="Phone Number"
                             value={formData.phone}
+                            onChange={handleChange}
+                        />
+                        {/* Address */}
+                        <input
+                            name="address"
+                            type="text"
+                            required
+                            className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
+                            placeholder="Address"
+                            value={formData.address}
+                            onChange={handleChange}
+                        />
+                        {/* City */}
+                        <input
+                            name="city"
+                            type="text"
+                            required
+                            className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
+                            placeholder="City"
+                            value={formData.city}
                             onChange={handleChange}
                         />
                         {/* Birth Year */}
