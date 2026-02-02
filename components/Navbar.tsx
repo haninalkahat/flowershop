@@ -10,8 +10,17 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const { getTotalItems } = useCart();
+  const [animateCart, setAnimateCart] = useState(false);
+  const { cart, getTotalItems } = useCart();
   const { user, logout } = useAuth();
+
+  useEffect(() => {
+    if (getTotalItems() > 0) {
+      setAnimateCart(true);
+      const timer = setTimeout(() => setAnimateCart(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [cart]); // Animate when cart changes
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Prevent hydration mismatch
@@ -98,7 +107,10 @@ export default function Navbar() {
           )}
 
           <div className="border-l border-gray-200 pl-6 ml-2 flex items-center space-x-4">
-            <Link href="/cart" className="relative text-gray-500 hover:text-pink-600 transition-colors duration-200">
+            <Link
+              href="/cart"
+              className={`relative text-gray-500 hover:text-pink-600 transition-all duration-300 transform ${animateCart ? 'scale-125 text-pink-700' : 'scale-100'}`}
+            >
               <ShoppingCart className="w-5 h-5" />
               {mounted && getTotalItems() > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 bg-pink-600 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center border-2 border-white">

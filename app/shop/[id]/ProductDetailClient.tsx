@@ -5,7 +5,8 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
-import { ArrowLeft, Minus, Plus, ShoppingCart, Star } from 'lucide-react';
+import { ArrowLeft, Minus, Plus, ShoppingCart, Star, Loader2 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 export default function ProductDetailClient({ product }: { product: any }) {
     const { addToCart } = useCart();
@@ -42,17 +43,39 @@ export default function ProductDetailClient({ product }: { product: any }) {
 
     const price = product.discountPrice ? Number(product.discountPrice) : Number(product.originalPrice);
 
-    const handleAddToCart = () => {
-        addToCart({
-            id: product.id,
-            name: product.name,
-            description: product.description,
-            imageUrl: currentImage, // Use current image (variant image)
-            originalPrice: Number(product.originalPrice),
-            discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
-            flowerType: product.flowerType,
-            selectedColor: selectedColor !== 'Original' ? selectedColor : undefined
-        }, quantity);
+    const [loading, setLoading] = useState(false);
+
+    // ... imports need to include toast and Loader2 ... 
+    // Wait, I can't easily add imports with replace_file_content if they are far away.
+    // I should check imports first.
+
+    // Skipping import check for a moment, assuming I can add them if I do a wider replace or use multi_replace.
+    // Actually, let's use multi_replace to add imports and logic.
+
+    const handleAddToCart = async () => {
+        if (loading) return;
+        setLoading(true);
+        try {
+            // Simulate a brief network delay for better UX (optional, but requested "briefly")
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            addToCart({
+                id: product.id,
+                name: product.name,
+                description: product.description,
+                imageUrl: currentImage,
+                originalPrice: Number(product.originalPrice),
+                discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
+                flowerType: product.flowerType,
+                selectedColor: selectedColor !== 'Original' ? selectedColor : undefined
+            }, quantity);
+
+            toast.success(`${product.name} added to cart! 🌸`);
+        } catch (error) {
+            toast.error('Could not add to cart. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -186,10 +209,23 @@ export default function ProductDetailClient({ product }: { product: any }) {
                             {/* Add to Cart */}
                             <button
                                 onClick={handleAddToCart}
-                                className="flex-1 bg-gray-900 text-white font-bold py-4 rounded-full hover:bg-pink-600 transition-colors shadow-lg shadow-gray-200 hover:shadow-pink-200 flex items-center justify-center gap-2"
+                                disabled={loading}
+                                className={`flex-1 bg-gray-900 text-white font-bold py-4 rounded-full transition-all shadow-lg shadow-gray-200 flex items-center justify-center gap-2 ${loading
+                                        ? 'opacity-80 cursor-not-allowed scale-[0.98]'
+                                        : 'hover:bg-pink-600 hover:shadow-pink-200'
+                                    }`}
                             >
-                                <ShoppingCart className="w-5 h-5" />
-                                <span>Add to Cart - ${(price * quantity).toFixed(2)}</span>
+                                {loading ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        <span>Adding...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <ShoppingCart className="w-5 h-5" />
+                                        <span>Add to Cart - ${(price * quantity).toFixed(2)}</span>
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>

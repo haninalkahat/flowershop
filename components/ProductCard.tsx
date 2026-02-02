@@ -1,8 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart, Product } from '@/context/CartContext';
+import { toast } from 'react-hot-toast';
+import { Loader2 } from 'lucide-react';
 
 interface ProductCardProps {
     product: Product;
@@ -10,9 +13,21 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
     const { addToCart } = useCart();
+    const [loading, setLoading] = useState(false);
 
-    const handleAddToCart = () => {
-        addToCart(product, 1);
+    const handleAddToCart = async () => {
+        if (loading) return;
+        setLoading(true);
+
+        try {
+            await new Promise(resolve => setTimeout(resolve, 500)); // Brief simulated delay
+            addToCart(product, 1);
+            toast.success('Added to cart!');
+        } catch (error) {
+            toast.error('Failed to add to cart');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const displayPrice = product.discountPrice !== null ? product.discountPrice : product.originalPrice;
@@ -43,12 +58,22 @@ export default function ProductCard({ product }: ProductCardProps) {
                     </span>
                     <button
                         onClick={handleAddToCart}
-                        className="w-full bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-full transition-colors duration-300 font-medium shadow-sm hover:shadow-md"
+                        disabled={loading}
+                        className={`w-full text-white py-2 rounded-full transition-all duration-300 font-medium shadow-sm hover:shadow-md flex items-center justify-center gap-2 ${loading ? 'bg-pink-400 cursor-wait' : 'bg-pink-500 hover:bg-pink-600'
+                            }`}
                     >
-                        Add to Cart
+                        {loading ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <span>Adding...</span>
+                            </>
+                        ) : (
+                            'Add to Cart'
+                        )}
                     </button>
-                </div>
-            </div>
-        </div>
+
+                </div >
+            </div >
+        </div >
     );
 }

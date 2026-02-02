@@ -18,7 +18,7 @@ async function getUser() {
     }
 }
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const userId = await getUser();
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -38,7 +38,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     return NextResponse.json({ order });
 }
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const userId = await getUser();
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

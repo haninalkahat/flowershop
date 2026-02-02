@@ -46,9 +46,9 @@ export default function CartPage() {
           <div className="text-center">Total</div>
         </div>
 
-        {cart.map((item) => {
+        {cart.map((item, index) => {
           const price = item.discountPrice !== null ? item.discountPrice : item.originalPrice;
-          const key = `${item.id}-${item.selectedColor || 'default'}`;
+          const key = `${item.id}-${item.selectedColor || 'default'}-${index}`; // Add index to ensure uniqueness if data is duplicated
 
           return (
             <div key={key} className="flex flex-col md:grid md:grid-cols-6 gap-4 p-4 md:p-6 border-b border-gray-100 items-start md:items-center">
