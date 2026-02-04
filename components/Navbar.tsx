@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Flower, ShoppingCart, User, ChevronDown } from 'lucide-react';
+import { Flower, ShoppingCart, User, ChevronDown, Heart } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -84,13 +84,15 @@ export default function Navbar() {
                   >
                     My Orders
                   </Link>
-                  <Link
-                    href="/admin/orders"
-                    onClick={() => setShowUserDropdown(false)}
-                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200"
-                  >
-                    Admin Panel
-                  </Link>
+                  {user.email === 'llaffashopstore@gmail.com' && (
+                    <Link
+                      href="/admin/orders"
+                      onClick={() => setShowUserDropdown(false)}
+                      className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200"
+                    >
+                      Admin Panel
+                    </Link>
+                  )}
                   <button
                     onClick={() => { logout(); setShowUserDropdown(false); }}
                     className="w-full text-left px-4 py-2 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200"
@@ -106,7 +108,15 @@ export default function Navbar() {
             </Link>
           )}
 
+
           <div className="border-l border-gray-200 pl-6 ml-2 flex items-center space-x-4">
+            <Link
+              href="/wishlist"
+              className="text-gray-500 hover:text-pink-600 transition-colors duration-200"
+            >
+              <Heart className="w-6 h-6" />
+            </Link>
+
             <Link
               href="/cart"
               className={`relative text-gray-500 hover:text-pink-600 transition-all duration-300 transform ${animateCart ? 'scale-125 text-pink-700' : 'scale-100'}`}
@@ -139,6 +149,7 @@ export default function Navbar() {
           <Link href="/" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>Home</Link>
           <Link href="/about" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>About</Link>
           <Link href="/contact" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>Contact</Link>
+          <Link href="/wishlist" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>Wishlist</Link>
           <Link href="/cart" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>
             Cart ({getTotalItems()})
           </Link>
@@ -146,7 +157,9 @@ export default function Navbar() {
             <div className="pt-2 border-t border-gray-100 flex flex-col space-y-2">
               <span className="block text-gray-700 font-medium px-2">{user.fullName}</span>
               <Link href="/orders" className="block text-gray-600 hover:text-pink-600 py-2 px-2" onClick={() => setIsOpen(false)}>My Orders</Link>
-              <Link href="/admin/orders" className="block text-gray-600 hover:text-pink-600 py-2 px-2" onClick={() => setIsOpen(false)}>Admin Panel</Link>
+              {user.email === 'llaffashopstore@gmail.com' && (
+                <Link href="/admin/orders" className="block text-gray-600 hover:text-pink-600 py-2 px-2" onClick={() => setIsOpen(false)}>Admin Panel</Link>
+              )}
               <button onClick={() => { logout(); setIsOpen(false); }} className="block w-full text-left text-pink-600 font-medium py-2 px-2 hover:bg-pink-50 rounded">
                 Logout
               </button>

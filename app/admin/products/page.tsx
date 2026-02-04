@@ -64,9 +64,9 @@ export default function AdminProductsPage() {
                 </td>
                 <td className="p-4 text-right">
                   {/* Edit - Placeholder as we focus on Create first */}
-                  <button className="text-blue-600 hover:text-blue-800 mx-2" disabled>
+                  <Link href={`/admin/products/${product.id}/edit`} className="text-blue-600 hover:text-blue-800 mx-2 inline-block">
                     <Edit size={18} />
-                  </button>
+                  </Link>
                 </td>
               </tr>
             ))}

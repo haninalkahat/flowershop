@@ -20,11 +20,15 @@ export default function ProductForm({ onSubmit }: ProductFormProps) {
       id: String(Date.now()), // Placeholder for UUID
       name,
       description,
-      imageUrl,
+      images: [imageUrl],
       originalPrice: originalPrice as any, // Cast to any to bypass Decimal type check for mock
       discountPrice: (discountPrice || null) as any,
       flowerType: 'Mixed', // Default value
       stemLength: null,
+      origin: 'Holland',
+      freshness: 'Guaranteed 7 Days',
+      height: null,
+      isFeatured: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     } as Product;

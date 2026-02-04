@@ -16,11 +16,11 @@ export default function ProductList({ products }: ProductListProps) {
         products.map((product) => (
           <div key={product.id} className="flex items-center space-x-4 bg-gray-50 p-4 rounded-lg shadow-sm">
             <Image
-              src={product.imageUrl}
+              src={product.images[0] || '/placeholder-image.jpg'}
               alt={product.name}
               width={80}
               height={80}
-              className="rounded-md object-cover"
+              className="rounded-md object-cover aspect-square"
             />
             <div>
               <h3 className="text-lg font-semibold text-forest">{product.name}</h3>

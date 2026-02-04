@@ -10,6 +10,7 @@ import Link from 'next/link';
 export default function CheckoutPage() {
     const { cart, getTotalPrice, clearCart } = useCart();
     const router = useRouter();
+    const [paymentMethod, setPaymentMethod] = useState<'BANK_TRANSFER' | 'WESTERN_UNION'>('BANK_TRANSFER');
     const [uploading, setUploading] = useState(false);
     const [receiptFile, setReceiptFile] = useState<File | null>(null);
     const [orderPlaced, setOrderPlaced] = useState(false);
@@ -21,9 +22,14 @@ export default function CheckoutPage() {
         iban: 'TR96 0001 0090 1063 1679 1050 01'
     };
 
+    const westernUnionDetails = {
+        receiverName: 'Hanin Alkahat',
+        country: 'Türkiye'
+    };
+
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
-        alert('IBAN copied to clipboard!');
+        alert('Copied to clipboard!');
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,7 +41,7 @@ export default function CheckoutPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!receiptFile) {
-            setError('Please upload a payment receipt.');
+            setError(paymentMethod === 'WESTERN_UNION' ? 'Please upload the MTCN receipt.' : 'Please upload a payment receipt.');
             return;
         }
 
@@ -47,6 +53,7 @@ export default function CheckoutPage() {
             const formData = new FormData();
             formData.append('file', receiptFile);
             formData.append('items', JSON.stringify(cart)); // Send cart items as fallback
+            formData.append('paymentMethod', paymentMethod);
 
             // Note: We don't need to pass cart items manually if the backend fetches from DB cart.
             // But if we did, we'd JSON.stringify them into a field. 
@@ -110,8 +117,14 @@ export default function CheckoutPage() {
                     <h2 className="text-xl font-medium mb-4">Order Summary</h2>
                     <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
                         {cart.map((item) => (
-                            <div key={`${item.id}-${item.selectedColor}`} className="flex justify-between text-sm">
-                                <span>{item.name} x {item.quantity}</span>
+                            <div key={`${item.id}-${item.selectedColor}`} className="flex justify-between text-sm py-2 border-b border-gray-50 last:border-0">
+                                <div>
+                                    <span className="block font-medium">{item.name} x {item.quantity}</span>
+                                    <span className="text-xs text-gray-500">
+                                        {item.selectedColor && `Color: ${item.selectedColor}`} {item.selectedColor && item.height && ' | '}
+                                        {item.height && `Size: ${item.height}`}
+                                    </span>
+                                </div>
                                 <span>${(item.discountPrice || item.originalPrice).toFixed(2)}</span>
                             </div>
                         ))}
@@ -124,38 +137,83 @@ export default function CheckoutPage() {
 
                 {/* Payment Details */}
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 order-2 md:order-2">
-                    <h2 className="text-xl font-medium mb-4">Bank Transfer Details</h2>
-                    <div className="space-y-3 text-sm text-gray-700">
-                        <div>
-                            <span className="font-semibold block">Bank Name:</span>
-                            {bankDetails.bankName}
-                        </div>
-                        <div>
-                            <span className="font-semibold block">Account Holder:</span>
-                            {bankDetails.accountHolder}
-                        </div>
-                        <div className="w-full overflow-hidden">
-                            <span className="font-semibold block mb-1">IBAN:</span>
-                            <div className="flex items-center gap-2 bg-gray-50 p-2 rounded border w-full max-w-full">
-                                <code className="text-xs break-all flex-1">{bankDetails.iban}</code>
-                                <button
-                                    onClick={() => copyToClipboard(bankDetails.iban)}
-                                    className="p-2 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
-                                    title="Copy IBAN"
-                                >
-                                    <Copy size={16} className="text-gray-500" />
-                                </button>
+                    <h2 className="text-xl font-medium mb-4">Payment Method</h2>
+
+                    {/* Payment Method Selection */}
+                    <div className="flex gap-2 mb-6">
+                        <button
+                            type="button"
+                            onClick={() => setPaymentMethod('BANK_TRANSFER')}
+                            className={`flex-1 py-2 text-sm font-medium rounded-md border transition-colors ${paymentMethod === 'BANK_TRANSFER'
+                                    ? 'bg-pink-50 border-pink-200 text-pink-700'
+                                    : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                                }`}
+                        >
+                            Bank Transfer
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setPaymentMethod('WESTERN_UNION')}
+                            className={`flex-1 py-2 text-sm font-medium rounded-md border transition-colors ${paymentMethod === 'WESTERN_UNION'
+                                    ? 'bg-pink-50 border-pink-200 text-pink-700'
+                                    : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                                }`}
+                        >
+                            Western Union
+                        </button>
+                    </div>
+
+                    {paymentMethod === 'BANK_TRANSFER' ? (
+                        <div className="space-y-3 text-sm text-gray-700 animate-in fade-in duration-300">
+                            <h3 className="font-medium text-gray-900 mb-2">Bank Transfer Details</h3>
+                            <div>
+                                <span className="font-semibold block">Bank Name:</span>
+                                {bankDetails.bankName}
+                            </div>
+                            <div>
+                                <span className="font-semibold block">Account Holder:</span>
+                                {bankDetails.accountHolder}
+                            </div>
+                            <div className="w-full overflow-hidden">
+                                <span className="font-semibold block mb-1">IBAN:</span>
+                                <div className="flex items-center gap-2 bg-gray-50 p-2 rounded border w-full max-w-full">
+                                    <code className="text-xs break-all flex-1">{bankDetails.iban}</code>
+                                    <button
+                                        onClick={() => copyToClipboard(bankDetails.iban)}
+                                        className="p-2 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
+                                        title="Copy IBAN"
+                                    >
+                                        <Copy size={16} className="text-gray-500" />
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="space-y-3 text-sm text-gray-700 animate-in fade-in duration-300">
+                            <h3 className="font-medium text-gray-900 mb-2">Western Union Details</h3>
+                            <div>
+                                <span className="font-semibold block">Receiver Name:</span>
+                                {westernUnionDetails.receiverName}
+                            </div>
+                            <div>
+                                <span className="font-semibold block">Country:</span>
+                                {westernUnionDetails.country}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
             {/* Upload Section - Full width below */}
             <div className="mt-4 md:mt-8 bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-20 px-4">
-                <h2 className="text-xl font-medium mb-4">Upload Payment Receipt</h2>
+                <h2 className="text-xl font-medium mb-4">
+                    {paymentMethod === 'WESTERN_UNION' ? 'Upload MTCN Receipt / Payment Proof' : 'Upload Payment Receipt'}
+                </h2>
                 <p className="text-sm text-gray-500 mb-4">
-                    Please transfer the total amount to the IBAN above and upload a screenshot of the receipt.
+                    {paymentMethod === 'WESTERN_UNION'
+                        ? 'Please send the payment via Western Union to the details above and upload a photo of the receipt showing the MTCN code.'
+                        : 'Please transfer the total amount to the IBAN above and upload a screenshot of the receipt.'
+                    }
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-4 w-full">

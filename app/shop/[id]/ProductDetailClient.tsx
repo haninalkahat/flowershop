@@ -1,30 +1,77 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
-import { ArrowLeft, Minus, Plus, ShoppingCart, Star, Loader2 } from 'lucide-react';
+import { ArrowLeft, Minus, Plus, ShoppingCart, Star, Loader2, Heart } from 'lucide-react';
+import { useWishlist } from '@/context/WishlistContext';
 import { toast } from 'react-hot-toast';
 
-export default function ProductDetailClient({ product }: { product: any }) {
+export default function ProductDetailClient({ product, initialColor }: { product: any, initialColor?: string }) {
     const { addToCart } = useCart();
+    const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+    const isFavorite = isInWishlist(product.id);
+
+    const toggleWishlist = () => {
+        if (isFavorite) removeFromWishlist(product.id);
+        else addToWishlist(product.id);
+    };
 
     // Parse variants to get colors
-    // We assume backend returns: { ..., variants: [{ colorName: 'Red', imageUrl: '...' }] }
-
-    // Default to the first variant color if available, or 'Original'
     const hasVariants = product.variants && product.variants.length > 0;
 
-    const [selectedColor, setSelectedColor] = useState<string>(
-        hasVariants ? product.variants[0].colorName : 'Original'
-    );
+    // Use initialColor if provided and valid, otherwise default to first variant or 'Original'
+    const getInitialColor = () => {
+        if (initialColor && hasVariants) {
+            const variantExists = product.variants.some((v: any) => v.colorName.toLowerCase() === initialColor.toLowerCase());
+            if (variantExists) return product.variants.find((v: any) => v.colorName.toLowerCase() === initialColor.toLowerCase()).colorName;
+        }
+        return hasVariants ? product.variants[0].colorName : 'Original';
+    };
 
-    // Initial image is main image or first variant
-    const [currentImage, setCurrentImage] = useState<string>(
-        hasVariants ? product.variants[0].imageUrl : product.imageUrl
-    );
+    const [selectedColor, setSelectedColor] = useState<string>(getInitialColor());
+
+    // Initial image logic based on selectedColor
+    const getInitialImages = () => {
+        const color = getInitialColor();
+        if (hasVariants) {
+            const variant = product.variants.find((v: any) => v.colorName === color);
+            // Check if variant has specific images, else fallback to product images
+            if (variant && variant.images && variant.images.length > 0) return variant.images;
+            if (variant && variant.imageUrl) return [variant.imageUrl]; // Legacy fallback
+        }
+        return product.images && product.images.length > 0 ? product.images : [product.imageUrl];
+    };
+
+    // State for the currently displayed images list (based on variant)
+    const [currentImages, setCurrentImages] = useState<string[]>(getInitialImages());
+    // State for the main large image being viewed
+    const [mainImage, setMainImage] = useState<string>(currentImages[0]);
+
+    useEffect(() => {
+        // When selectedColor changes, update images
+        const color = selectedColor;
+        let newImages: string[] = [];
+
+        if (hasVariants) {
+            const variant = product.variants.find((v: any) => v.colorName === color);
+            if (variant) {
+                if (variant.images && variant.images.length > 0) newImages = variant.images;
+                else if (variant.imageUrl) newImages = [variant.imageUrl];
+                else newImages = product.images || [product.imageUrl];
+            } else {
+                newImages = product.images || [product.imageUrl];
+            }
+        } else {
+            newImages = product.images || [product.imageUrl];
+        }
+
+        setCurrentImages(newImages);
+        setMainImage(newImages[0]);
+    }, [selectedColor, product, hasVariants]); // Added hasVariants to dependency array for completeness
+
 
     // Check if main image should be the default fallback if "Original" is selected?
     // Actually, if variants exist, we probably want to select one.
@@ -33,40 +80,51 @@ export default function ProductDetailClient({ product }: { product: any }) {
 
     const [quantity, setQuantity] = useState(1);
 
+    // Calculate current price based on selected variant
+    const selectedVariant = hasVariants ? product.variants.find((v: any) => v.colorName === selectedColor) : null;
+    const currentPrice = selectedVariant && selectedVariant.price
+        ? Number(selectedVariant.price)
+        : (product.discountPrice ? Number(product.discountPrice) : Number(product.originalPrice));
+
+    // Effect to update image when variant changes (already handled by handleColorSelect but let's reinforce or simplify)
+    // Actually handleColorSelect handles it, but let's ensure it doesn't get messed up.
+
+    // Fix: We need to ensure we don't pass 'Decimal' objects if any slipped through, but we handle that in server component now.
+
+    // Ensure initial image is correct if not set
+    // (State initialization already does this)
+
+    // Fix "Ghosting" or "Reset" - straightforward state update.
+    // The issue might be that if we re-render or something, we want to stick to the selected variant.
+
+    // One edge case: if we swap variants, but the image is invalid?
+    // We assume valid images.
+
+    // Let's ensure handleColorSelect is robust
     const handleColorSelect = (color: string) => {
+        if (color === selectedColor) return; // No op
         setSelectedColor(color);
-        const variant = product.variants.find((v: any) => v.colorName === color);
-        if (variant) {
-            setCurrentImage(variant.imageUrl);
-        }
+        // Effect will update images
     };
 
-    const price = product.discountPrice ? Number(product.discountPrice) : Number(product.originalPrice);
-
     const [loading, setLoading] = useState(false);
-
-    // ... imports need to include toast and Loader2 ... 
-    // Wait, I can't easily add imports with replace_file_content if they are far away.
-    // I should check imports first.
-
-    // Skipping import check for a moment, assuming I can add them if I do a wider replace or use multi_replace.
-    // Actually, let's use multi_replace to add imports and logic.
 
     const handleAddToCart = async () => {
         if (loading) return;
         setLoading(true);
         try {
-            // Simulate a brief network delay for better UX (optional, but requested "briefly")
             await new Promise(resolve => setTimeout(resolve, 500));
 
             addToCart({
                 id: product.id,
                 name: product.name,
                 description: product.description,
-                imageUrl: currentImage,
-                originalPrice: Number(product.originalPrice),
-                discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
+                imageUrl: mainImage,
+                // Override original price with current calculated price (variant or base)
+                originalPrice: currentPrice,
+                discountPrice: null, // Ensure discount is cleared when overriding
                 flowerType: product.flowerType,
+                images: currentImages,
                 selectedColor: selectedColor !== 'Original' ? selectedColor : undefined
             }, quantity);
 
@@ -92,19 +150,48 @@ export default function ProductDetailClient({ product }: { product: any }) {
                 </nav>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
-                    {/* Left: Image */}
-                    <div className="relative bg-gray-50 rounded-3xl overflow-hidden aspect-square border border-gray-100 shadow-sm group">
-                        <div className="relative w-full h-full">
-                            {/* Wrapper div for Fill image */}
+                    {/* Left: Image Gallery */}
+                    <div className="space-y-4">
+                        {/* Main Image */}
+                        <div className="relative w-full aspect-square bg-[#F9F9F9] rounded-3xl overflow-hidden shadow-sm border border-gray-100/50 group">
                             <Image
-                                src={currentImage}
+                                src={mainImage || '/placeholder.jpg'}
                                 alt={product.name}
                                 fill
-                                className="object-contain p-8 group-hover:scale-105 transition-transform duration-700 ease-out"
                                 priority
+                                className="object-contain p-6 group-hover:scale-105 transition-transform duration-700 ease-in-out"
                                 sizes="(max-width: 768px) 100vw, 50vw"
                             />
+                            <button
+                                onClick={toggleWishlist}
+                                className="absolute top-6 right-6 p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:scale-110 transition-all duration-300 z-10 group/btn"
+                            >
+                                <Heart className={`w-6 h-6 transition-colors ${isFavorite ? 'fill-pink-500 text-pink-500' : 'text-gray-400 group-hover/btn:text-pink-500'}`} />
+                            </button>
+
+                            {/* Floating Info Badges */}
+                            {product.isFeatured && (
+                                <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full shadow-sm flex items-center gap-1.5 z-10">
+                                    <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
+                                    <span className="text-xs font-semibold text-gray-800 tracking-wide uppercase">Featured</span>
+                                </div>
+                            )}
                         </div>
+
+                        {/* Thumbnails */}
+                        {currentImages.length > 1 && (
+                            <div className="grid grid-cols-4 gap-4">
+                                {currentImages.map((img, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setMainImage(img)}
+                                        className={`relative aspect-square rounded-xl overflow-hidden border-2 bg-[#F9F9F9] transition-all ${mainImage === img ? 'border-pink-500 ring-2 ring-pink-100' : 'border-transparent hover:border-gray-200'}`}
+                                    >
+                                        <Image src={img} alt={`View ${idx}`} fill className="object-contain p-1" sizes="20vw" />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Right: Details */}
@@ -118,9 +205,12 @@ export default function ProductDetailClient({ product }: { product: any }) {
 
                         <div className="flex items-center gap-4 mb-6">
                             <span className="text-3xl font-medium text-gray-900">
-                                ${price.toFixed(2)}
+                                ${currentPrice.toFixed(2)}
                             </span>
-                            {product.discountPrice && (
+                            {/* Only show "sale" price if we are NOT on a variant specific upgrade that might hide the discount logic, 
+                               or if the base product had a discount. Complex logic... 
+                               For now, simplified: show current price as the price. */}
+                            {!selectedVariant && product.discountPrice && (
                                 <span className="text-xl text-gray-300 line-through">
                                     ${Number(product.originalPrice).toFixed(2)}
                                 </span>
@@ -144,19 +234,19 @@ export default function ProductDetailClient({ product }: { product: any }) {
                                     <span className="block text-gray-500 mb-1">Flower Type</span>
                                     <span className="font-medium text-gray-900">{product.flowerType}</span>
                                 </div>
-                                {product.stemLength && (
+                                {product.height && (
                                     <div>
-                                        <span className="block text-gray-500 mb-1">Stem Length</span>
-                                        <span className="font-medium text-gray-900">{product.stemLength} cm</span>
+                                        <span className="block text-gray-500 mb-1">Height / Size</span>
+                                        <span className="font-medium text-gray-900">{product.height}</span>
                                     </div>
                                 )}
                                 <div>
                                     <span className="block text-gray-500 mb-1">Freshness</span>
-                                    <span className="font-medium text-gray-900">Guaranteed 7 Days</span>
+                                    <span className="font-medium text-gray-900">{product.freshness || 'Guaranteed 7 Days'}</span>
                                 </div>
                                 <div>
                                     <span className="block text-gray-500 mb-1">Origin</span>
-                                    <span className="font-medium text-gray-900">Holland / Ecuador</span>
+                                    <span className="font-medium text-gray-900">{product.origin || 'Holland / Ecuador'}</span>
                                 </div>
                             </div>
                         </div>
@@ -178,7 +268,7 @@ export default function ProductDetailClient({ product }: { product: any }) {
                                                 }`}
                                         >
                                             <div className="w-4 h-4 rounded-full border shadow-sm relative overflow-hidden">
-                                                <Image src={v.imageUrl} alt={v.colorName} fill className="object-cover" sizes="16px" />
+                                                <Image src={v.images?.[0] || v.imageUrl || '/placeholder.jpg'} alt={v.colorName} fill className="object-cover" sizes="16px" />
                                             </div>
                                             {v.colorName}
                                         </button>
@@ -211,8 +301,8 @@ export default function ProductDetailClient({ product }: { product: any }) {
                                 onClick={handleAddToCart}
                                 disabled={loading}
                                 className={`flex-1 bg-gray-900 text-white font-bold py-4 rounded-full transition-all shadow-lg shadow-gray-200 flex items-center justify-center gap-2 ${loading
-                                        ? 'opacity-80 cursor-not-allowed scale-[0.98]'
-                                        : 'hover:bg-pink-600 hover:shadow-pink-200'
+                                    ? 'opacity-80 cursor-not-allowed scale-[0.98]'
+                                    : 'hover:bg-pink-600 hover:shadow-pink-200'
                                     }`}
                             >
                                 {loading ? (
@@ -223,9 +313,15 @@ export default function ProductDetailClient({ product }: { product: any }) {
                                 ) : (
                                     <>
                                         <ShoppingCart className="w-5 h-5" />
-                                        <span>Add to Cart - ${(price * quantity).toFixed(2)}</span>
+                                        <span>Add to Cart - ${(currentPrice * quantity).toFixed(2)}</span>
                                     </>
                                 )}
+                            </button>
+                            <button
+                                onClick={toggleWishlist}
+                                className={`p-4 rounded-full border transition-all ${isFavorite ? 'bg-pink-50 border-pink-200 text-pink-500' : 'border-gray-200 hover:border-pink-300 text-gray-400 hover:text-pink-500'}`}
+                            >
+                                <Heart className={`w-6 h-6 ${isFavorite ? 'fill-pink-500' : ''}`} />
                             </button>
                         </div>
                     </div>

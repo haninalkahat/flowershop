@@ -11,17 +11,22 @@ model Product {
   id            String     @id @default(uuid())
   name          String
   description   String?
-  imageUrl      String
+  images        String[]   // Array of 4 images
   originalPrice Decimal
   discountPrice Decimal?
   flowerType    String     @default("Mixed")
   stemLength    Int?
+  // New Fields
+  origin        String?    @default("Holland")
+  freshness     String?    @default("Guaranteed 7 Days")
+  height        String?    // e.g. "40cm" or "60cm"
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
   isFeatured    Boolean    @default(false)
   variants      ProductVariant[]
   CartItem      CartItem[]
   OrderItems    OrderItem[]
+  WishlistItems WishlistItem[]
 }
 
 model ProductVariant {
@@ -29,14 +34,15 @@ model ProductVariant {
   productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   colorName String
-  imageUrl  String
+  images    String[] // Variant specific images
+  price     Decimal? // Variant specific price
 }
 
 model User {
   id          String   @id @default(uuid())
   fullName    String
   email       String   @unique
-  phoneNumber String   @unique
+  phoneNumber String?  @unique
   address     String?
   city        String?
   birthYear   Int?
@@ -47,6 +53,10 @@ model User {
   orders            Order[]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+  country           String?  // Made optional initially to support existing users if any (though we cleared DB)
+  image             String?
+  googleId          String?  @unique
+  wishlist          Wishlist?
 }
 
 model Cart {
@@ -68,6 +78,26 @@ model CartItem {
   selectedColor   String?
 }
 
+model Wishlist {
+  id        String     @id @default(uuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id])
+  items     WishlistItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model WishlistItem {
+  id         String   @id @default(uuid())
+  wishlistId String
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  addedAt    DateTime @default(now())
+
+  @@unique([wishlistId, productId])
+}
+
 enum OrderStatus {
   AWAITING_PAYMENT
   PAID
@@ -82,9 +112,15 @@ model Order {
   items       OrderItem[]
   totalAmount Decimal
   status      OrderStatus    @default(AWAITING_PAYMENT)
+  paymentMethod PaymentMethod @default(BANK_TRANSFER)
   receipt     PaymentReceipt?
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  WESTERN_UNION
 }
 
 model OrderItem {

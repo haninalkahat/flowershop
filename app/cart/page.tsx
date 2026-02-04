@@ -56,7 +56,7 @@ export default function CartPage() {
               <div className="col-span-3 flex w-full items-start space-x-4">
                 <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-50 border border-gray-100">
                   <Image
-                    src={item.imageUrl}
+                    src={item.imageUrl || (item.images && item.images[0]) || '/placeholder.jpg'}
                     alt={item.name}
                     fill
                     className="object-contain p-1"
@@ -68,6 +68,9 @@ export default function CartPage() {
                   <p className="text-xs md:text-sm text-gray-500 truncate max-w-xs mb-1">{item.description}</p>
                   {item.selectedColor && (
                     <p className="text-xs text-gray-500">Color: <span className="font-medium text-gray-700">{item.selectedColor}</span></p>
+                  )}
+                  {item.height && (
+                    <p className="text-xs text-gray-500">Size: <span className="font-medium text-gray-700">{item.height}</span></p>
                   )}
                   {/* Mobile Only: Price inside this block for better vertical stacking */}
                   <div className="md:hidden mt-2 font-medium text-pink-700">

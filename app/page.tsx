@@ -35,7 +35,10 @@ export default async function Home() {
     id: p.id,
     name: p.name,
     description: p.description || '',
-    imageUrl: p.imageUrl,
+    // @ts-ignore
+    imageUrl: p.images?.[0] || '', // Fallback to first image
+    // @ts-ignore
+    images: p.images,
     originalPrice: Number(p.originalPrice),
     discountPrice: p.discountPrice ? Number(p.discountPrice) : null,
     flowerType: p.flowerType,
@@ -69,12 +72,12 @@ export default async function Home() {
       </section>
 
       {/* Product Grid */}
-      <section className="container mx-auto py-16 px-4">
-        <h2 className="text-4xl font-bold text-center text-pink-700 mb-12 font-serif">Our Beautiful Blooms</h2>
+      <section className="container mx-auto py-20 px-6 max-w-6xl">
+        <h2 className="text-4xl font-bold text-center text-pink-700 mb-16 font-serif tracking-wide">Our Beautiful Blooms</h2>
         {products.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-14">
+            {products.map((product, index) => (
+              <ProductCard key={product.id} product={product} priority={index === 0} />
             ))}
           </div>
         ) : (

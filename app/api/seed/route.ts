@@ -4,10 +4,68 @@ import prisma from '@/lib/prisma';
 export async function GET() {
     try {
         const products = [
+            // New Featured Products (3)
+            {
+                name: 'Midnight Calla Lilies',
+                description: 'Elegant and mysterious dark purple calla lilies, perfect for a sophisticated statement.',
+                images: ['/calla-lily.jpg'],
+                originalPrice: 75.00,
+                discountPrice: null,
+                flowerType: 'Lilies',
+                isFeatured: true,
+                origin: 'Holland',
+                freshness: 'Guaranteed 7 Days',
+            },
+            {
+                name: 'Elegant White Lilies',
+                description: 'Pristine white lilies that radiate purity and grace. A classic choice for any refined setting.',
+                images: ['/white-lily-fresh.jpg'],
+                originalPrice: 60.00,
+                discountPrice: 55.00,
+                flowerType: 'Lilies',
+                isFeatured: true,
+                origin: 'France',
+                freshness: 'Guaranteed 5 Days',
+            },
+            {
+                name: 'Blushing Peonies',
+                description: 'Lush pink peonies with voluminous layers of petals. A symbol of romance and prosperity.',
+                images: ['/pink-peony.jpg'],
+                originalPrice: 95.00,
+                discountPrice: null,
+                flowerType: 'Peonies',
+                isFeatured: true,
+                origin: 'Holland',
+                freshness: 'Guaranteed 5 Days',
+            },
+            // Other New Products (2)
+            {
+                name: 'Spring Daffodils',
+                description: 'Bright and cheery daffodils to welcome the warmth of spring.',
+                images: ['/daffodil.jpg'],
+                originalPrice: 40.00,
+                discountPrice: null,
+                flowerType: 'Daffodils',
+                isFeatured: false,
+                origin: 'UK',
+                freshness: 'Guaranteed 5 Days',
+            },
+            {
+                name: 'Pink Hydrangea Cloud',
+                description: 'A voluminous cloud of soft pink hydrangea blooms.',
+                images: ['/hydrangea-pink.jpg'],
+                originalPrice: 55.00,
+                discountPrice: 48.00,
+                flowerType: 'Hydrangea',
+                isFeatured: false,
+                origin: 'Colombia',
+                freshness: 'Guaranteed 7 Days',
+            },
+            // Existing Products
             {
                 name: 'Royal Red Roses',
                 description: 'Breathtaking long-stemmed red roses for your special someone.',
-                imageUrl: '/flower-red.jpg',
+                images: ['/flower-red.jpg'],
                 originalPrice: 89.99,
                 discountPrice: 69.99,
                 flowerType: 'Roses',
@@ -15,7 +73,7 @@ export async function GET() {
             {
                 name: 'Pure White Lilies',
                 description: 'Elegant white lilies that symbolize purity and grace.',
-                imageUrl: '/flower-blue.jpg',
+                images: ['/flower-blue.jpg'],
                 originalPrice: 54.99,
                 discountPrice: null,
                 flowerType: 'Lilies',
@@ -23,7 +81,7 @@ export async function GET() {
             {
                 name: 'Sunflower Happiness',
                 description: 'Bright and cheerful sunflowers to light up any room.',
-                imageUrl: '/flower-pink.jpg',
+                images: ['/flower-pink.jpg'],
                 originalPrice: 45.00,
                 discountPrice: 39.99,
                 flowerType: 'Sunflowers',
@@ -31,7 +89,7 @@ export async function GET() {
             {
                 name: 'Midnight Tulips',
                 description: 'Rare dark purple tulips for a touch of mystery.',
-                imageUrl: '/flower-tulip.jpg',
+                images: ['/flower-tulip.jpg'],
                 originalPrice: 65.00,
                 discountPrice: null,
                 flowerType: 'Tulips',
@@ -39,7 +97,7 @@ export async function GET() {
             {
                 name: 'Pink Orchid Delight',
                 description: 'Stunning pink orchids in a decorative pot.',
-                imageUrl: '/flower-lilies.jpg',
+                images: ['/flower-lilies.jpg'],
                 originalPrice: 120.00,
                 discountPrice: 99.00,
                 flowerType: 'Orchids',
@@ -47,7 +105,7 @@ export async function GET() {
             {
                 name: 'Mixed Carnation Bouquet',
                 description: 'A colorful mix of fresh carnations.',
-                imageUrl: '/flower-red.jpg',
+                images: ['/flower-red.jpg'],
                 originalPrice: 35.00,
                 discountPrice: null,
                 flowerType: 'Carnations',

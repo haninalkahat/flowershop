@@ -7,14 +7,15 @@ interface FilterSidebarProps {
         flowerTypes: string[];
         priceRange: { min: number; max: number };
     };
+    options: {
+        flowerTypes: string[];
+    };
     onFilterChange: (newFilters: any) => void;
     isMobileOpen: boolean;
     onClose: () => void;
 }
 
-const FLOWER_TYPES = ['Roses', 'Lilies', 'Sunflowers', 'Tulips', 'Orchids', 'Carnations'];
-
-export default function FilterSidebar({ filters, onFilterChange, isMobileOpen, onClose }: FilterSidebarProps) {
+export default function FilterSidebar({ filters, options, onFilterChange, isMobileOpen, onClose }: FilterSidebarProps) {
     const handleTypeChange = (type: string) => {
         const newTypes = filters.flowerTypes.includes(type)
             ? filters.flowerTypes.filter((t) => t !== type)
@@ -36,7 +37,7 @@ export default function FilterSidebar({ filters, onFilterChange, isMobileOpen, o
             <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 font-serif">Flower Type</h3>
                 <div className="space-y-3">
-                    {FLOWER_TYPES.map((type) => (
+                    {options.flowerTypes.length > 0 ? options.flowerTypes.map((type) => (
                         <label key={type} className="flex items-center gap-3 cursor-pointer group">
                             <input
                                 type="checkbox"
@@ -44,11 +45,13 @@ export default function FilterSidebar({ filters, onFilterChange, isMobileOpen, o
                                 onChange={() => handleTypeChange(type)}
                                 className="w-5 h-5 rounded border-gray-300 text-pink-600 focus:ring-pink-500 cursor-pointer"
                             />
-                            <span className="text-gray-600 group-hover:text-pink-600 transition-colors uppercase tracking-wider text-sm font-medium">
+                            <span className="text-gray-600 group-hover:text-pink-600 transition-colors capitalize tracking-wider text-sm font-medium">
                                 {type}
                             </span>
                         </label>
-                    ))}
+                    )) : (
+                        <p className="text-sm text-gray-400 italic">No types available</p>
+                    )}
                 </div>
             </div>
 

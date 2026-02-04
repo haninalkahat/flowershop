@@ -1,89 +1,43 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { SlidersHorizontal, Flower } from 'lucide-react';
 import FilterSidebar from '@/components/FilterSidebar';
 import ProductCard from '@/components/ProductCard';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Product } from '@/context/CartContext';
 
-// Dummy data for initial dev if DB is empty or needs refresh
-// In a real app, this would come from an API or Prisma
-const MOCK_PRODUCTS: Product[] = [
-    {
-        id: '1',
-        name: 'Royal Red Roses',
-        description: 'Breathtaking long-stemmed red roses for your special someone.',
-        imageUrl: '/flower-red.jpg',
-        originalPrice: 89.99,
-        discountPrice: 69.99,
-        flowerType: 'Roses',
-    },
-    {
-        id: '2',
-        name: 'Pure White Lilies',
-        description: 'Elegant white lilies that symbolize purity and grace.',
-        imageUrl: '/flower-blue.jpg',
-        originalPrice: 54.99,
-        discountPrice: null,
-        flowerType: 'Lilies',
-    },
-    {
-        id: '3',
-        name: 'Sunflower Happiness',
-        description: 'Bright and cheerful sunflowers to light up any room.',
-        imageUrl: '/flower-pink.jpg',
-        originalPrice: 45.00,
-        discountPrice: 39.99,
-        flowerType: 'Sunflowers',
-    },
-    {
-        id: '4',
-        name: 'Midnight Tulips',
-        description: 'Rare dark purple tulips for a touch of mystery.',
-        imageUrl: '/flower-tulip.jpg',
-        originalPrice: 65.00,
-        discountPrice: null,
-        flowerType: 'Tulips',
-    },
-    {
-        id: '5',
-        name: 'Pink Orchid Delight',
-        description: 'Stunning pink orchids in a decorative pot.',
-        imageUrl: '/flower-lilies.jpg',
-        originalPrice: 120.00,
-        discountPrice: 99.00,
-        flowerType: 'Orchids',
-    },
-    {
-        id: '6',
-        name: 'Mixed Carnation Bouquet',
-        description: 'A colorful mix of fresh carnations.',
-        imageUrl: '/flower-red.jpg',
-        originalPrice: 35.00,
-        discountPrice: null,
-        flowerType: 'Carnations',
-    },
-];
+// Force dynamic rendering to prevent caching issues
+export const dynamic = 'force-dynamic';
 
 export default function ShopPage() {
-    const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS);
-    const [filteredProducts, setFilteredProducts] = useState<Product[]>(MOCK_PRODUCTS);
-    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+    const router = useRouter();
+    const searchParams = useSearchParams();
+
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    // Initialize filters from URL
     const [filters, setFilters] = useState({
-        flowerTypes: [] as string[],
-        priceRange: { min: 0, max: 1000 },
+        flowerTypes: searchParams.getAll('type'),
+        priceRange: {
+            min: Number(searchParams.get('minPrice')) || 0,
+            max: Number(searchParams.get('maxPrice')) || 1000,
+        },
     });
 
-    // Fetch real products from DB if possible
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+    // Fetch real products from DB
     useEffect(() => {
         async function fetchProducts() {
             try {
-                const res = await fetch('/api/products');
+                const res = await fetch('/api/products?t=' + Date.now()); // bust cache
                 if (res.ok) {
                     const data = await res.json();
-                    if (data && data.length > 0) {
-                        // Ensure prices are numbers (Prisma Decimals return as strings/objects)
+                    if (data) {
+                        // Ensure prices are numbers
                         const formattedData = data.map((item: any) => ({
                             ...item,
                             originalPrice: Number(item.originalPrice),
@@ -94,35 +48,60 @@ export default function ShopPage() {
                 }
             } catch (err) {
                 console.error('Failed to fetch products:', err);
+            } finally {
+                setLoading(false);
             }
         }
         fetchProducts();
     }, []);
 
-    // Update filtered list in real-time
-    useEffect(() => {
-        let result = [...products];
+    // Derive available options from products
+    const options = useMemo(() => {
+        const types = Array.from(new Set(products.map((p) => p.flowerType).filter((t): t is string => !!t)));
+        return {
+            flowerTypes: types,
+        };
+    }, [products]);
 
-        // Filter by Type
-        if (filters.flowerTypes.length > 0) {
-            result = result.filter((p) => filters.flowerTypes.includes(p.flowerType));
+    // Update URL when filters change
+    useEffect(() => {
+        const params = new URLSearchParams();
+        filters.flowerTypes.forEach((t) => params.append('type', t));
+
+        if (filters.priceRange.min > 0) params.set('minPrice', filters.priceRange.min.toString());
+        if (filters.priceRange.max < 1000) params.set('maxPrice', filters.priceRange.max.toString());
+
+        // Construct new URL
+        const newUrl = `?${params.toString()}`;
+
+        // Only push if changed to avoid unnecessary history entries or loops
+        if (newUrl !== window.location.search) {
+            router.push(newUrl, { scroll: false });
         }
 
+    }, [filters, router]);
 
+    // Filter products
+    const filteredProducts = useMemo(() => {
+        return products.filter((p) => {
+            // Filter by Type
+            if (filters.flowerTypes.length > 0 && !filters.flowerTypes.includes(p.flowerType)) {
+                return false;
+            }
 
-        // Filter by Price
-        result = result.filter((p) => {
+            // Filter by Price
             const price = p.discountPrice !== null ? Number(p.discountPrice) : Number(p.originalPrice);
-            return price >= filters.priceRange.min && price <= filters.priceRange.max;
-        });
+            if (price < filters.priceRange.min || price > filters.priceRange.max) {
+                return false;
+            }
 
-        setFilteredProducts(result);
-    }, [filters, products]);
+            return true;
+        });
+    }, [products, filters]);
 
     return (
         <main className="min-h-screen bg-gray-50 pt-12 pb-24">
             <div className="container mx-auto px-6">
-                {/* Header Area */}
                 {/* Header Area */}
                 <div className="flex flex-col items-center text-center justify-center mb-10 bg-pink-50/50 rounded-3xl py-12 px-6 relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-pink-200 to-transparent"></div>
@@ -158,6 +137,7 @@ export default function ShopPage() {
                     {/* Sidebar */}
                     <FilterSidebar
                         filters={filters}
+                        options={options}
                         onFilterChange={setFilters}
                         isMobileOpen={isMobileSidebarOpen}
                         onClose={() => setIsMobileSidebarOpen(false)}
@@ -171,8 +151,19 @@ export default function ShopPage() {
                             </p>
                         </div>
 
-                        {filteredProducts.length > 0 ? (
+                        {loading ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                                {[...Array(6)].map((_, i) => (
+                                    <div key={i} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm animate-pulse h-[400px]">
+                                        <div className="bg-gray-200 h-64 w-full rounded-xl mb-4"></div>
+                                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                        <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                                        <div className="h-10 bg-gray-200 rounded-full w-full mt-auto"></div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : filteredProducts.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 mb-20 animate-fade-in-up">
                                 {filteredProducts.map((product) => (
                                     <ProductCard key={product.id} product={product} />
                                 ))}

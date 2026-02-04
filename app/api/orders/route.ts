@@ -111,7 +111,8 @@ export async function POST(request: Request) {
         // Calculate total
         const totalAmount = orderItems.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
 
-        // Create Order in a transaction
+        const paymentMethod = (formData.get('paymentMethod') as string) || 'BANK_TRANSFER';
+
         const order = await prisma.$transaction(async (tx) => {
             // 1. Create Order
             const newOrder = await tx.order.create({
@@ -119,6 +120,7 @@ export async function POST(request: Request) {
                     userId,
                     totalAmount,
                     status: 'AWAITING_PAYMENT',
+                    paymentMethod: paymentMethod === 'WESTERN_UNION' ? 'WESTERN_UNION' : 'BANK_TRANSFER',
                     items: {
                         create: orderItems.map(item => ({
                             productId: item.productId,

@@ -7,13 +7,19 @@ export interface Product {
   id: string;
   name: string;
   description: string | null;
-  imageUrl: string;
+  images: string[];
+  imageUrl?: string; // Deprecated, keep for backward compatibility if needed temporarily
   originalPrice: number;
   discountPrice: number | null;
   flowerType: string;
-  stemLength?: number;  // Optional as not all products might have it
+  stemLength?: number;
   colors?: string[];
   colorImages?: Record<string, string>;
+  // New fields
+  height?: string;
+  origin?: string;
+  freshness?: string;
+  variants?: any[]; // Simplified for now to avoid circular dependencies or complex type imports
 }
 
 interface CartItem extends Product {

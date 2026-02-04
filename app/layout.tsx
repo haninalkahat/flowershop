@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { WishlistProvider } from '@/context/WishlistContext';
 import { CartProvider } from '@/context/CartContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { Toaster } from 'react-hot-toast';
@@ -26,10 +27,12 @@ export default function RootLayout({
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased text-gray-800`} suppressHydrationWarning>
         <AuthProvider>
           <CartProvider>
-            <Toaster position="top-center" toastOptions={{ duration: 3000, style: { background: '#333', color: '#fff' } }} />
-            <Navbar />
-            {children}
-            <Footer />
+            <WishlistProvider>
+              <Toaster position="top-center" toastOptions={{ duration: 3000, style: { background: '#333', color: '#fff' } }} />
+              <Navbar />
+              {children}
+              <Footer />
+            </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </body>

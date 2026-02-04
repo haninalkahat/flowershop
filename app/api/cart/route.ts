@@ -36,6 +36,9 @@ export async function GET() {
             // Ensure compatibility with Product interface in frontend
             originalPrice: Number(item.product.originalPrice),
             discountPrice: item.product.discountPrice ? Number(item.product.discountPrice) : null,
+            height: item.product.height,
+            origin: item.product.origin,
+            freshness: item.product.freshness,
         }))
     });
 }

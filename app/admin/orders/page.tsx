@@ -11,6 +11,7 @@ interface Order {
     user: { fullName: string; email: string };
     receipt?: { imageUrl: string };
     createdAt: string;
+    paymentMethod: string;
 }
 
 export default function AdminOrdersPage() {
@@ -78,6 +79,7 @@ export default function AdminOrdersPage() {
                             <th className="px-6 py-3 text-left font-medium text-gray-500">Order ID</th>
                             <th className="px-6 py-3 text-left font-medium text-gray-500">User</th>
                             <th className="px-6 py-3 text-left font-medium text-gray-500">Total</th>
+                            <th className="px-6 py-3 text-left font-medium text-gray-500">Method</th>
                             <th className="px-6 py-3 text-left font-medium text-gray-500">Receipt</th>
                             <th className="px-6 py-3 text-left font-medium text-gray-500">Status</th>
                             <th className="px-6 py-3 text-left font-medium text-gray-500">Actions</th>
@@ -92,6 +94,9 @@ export default function AdminOrdersPage() {
                                     <div className="text-gray-500 text-xs">{order.user.email}</div>
                                 </td>
                                 <td className="px-6 py-4 font-bold text-gray-900">${Number(order.totalAmount).toFixed(2)}</td>
+                                <td className="px-6 py-4 text-xs font-medium text-gray-600">
+                                    {order.paymentMethod ? order.paymentMethod.replace('_', ' ') : '-'}
+                                </td>
                                 <td className="px-6 py-4">
                                     {order.receipt ? (
                                         <a
