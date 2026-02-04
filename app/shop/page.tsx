@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { SlidersHorizontal, Flower } from 'lucide-react';
 import FilterSidebar from '@/components/FilterSidebar';
 import ProductCard from '@/components/ProductCard';
@@ -11,7 +11,7 @@ import { Product } from '@/context/CartContext';
 // Force dynamic rendering to prevent caching issues
 export const dynamic = 'force-dynamic';
 
-export default function ShopPage() {
+function ShopContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -189,5 +189,13 @@ export default function ShopPage() {
                 </div>
             </div>
         </main>
+    );
+}
+
+export default function ShopPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+            <ShopContent />
+        </Suspense>
     );
 }

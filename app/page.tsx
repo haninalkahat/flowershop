@@ -8,41 +8,55 @@ import { Product } from '@/context/CartContext';
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
+  let products: Product[] = [];
 
-  // Fetch Featured Products
-  const featuredDb = await prisma.product.findMany({
-    where: { isFeatured: true },
-    take: 3,
-    orderBy: { createdAt: 'desc' }
-  });
-
-  // Fallback if no featured products, get latest 3
-  let productsToDisplay = featuredDb;
-  if (productsToDisplay.length < 3) {
-    const remaining = 3 - productsToDisplay.length;
-    const additional = await prisma.product.findMany({
-      where: {
-        id: { notIn: productsToDisplay.map(p => p.id) }
-      },
-      take: remaining,
-      orderBy: { createdAt: 'desc' }
+  try {
+    // Fetch Featured Products
+    const featuredDb = await prisma.product.findMany({
+      where: { isFeatured: true },
+      take: 3,
+      orderBy: { createdAt: 'desc' },
+      include: { variants: true } // Include variants just in case needed or to prevent partial type issues
     });
-    productsToDisplay = [...productsToDisplay, ...additional];
-  }
 
-  // Transform for UI (Decimal to Number)
-  const products: Product[] = productsToDisplay.map(p => ({
-    id: p.id,
-    name: p.name,
-    description: p.description || '',
-    // @ts-ignore
-    imageUrl: p.images?.[0] || '', // Fallback to first image
-    // @ts-ignore
-    images: p.images,
-    originalPrice: Number(p.originalPrice),
-    discountPrice: p.discountPrice ? Number(p.discountPrice) : null,
-    flowerType: p.flowerType,
-  }));
+    // Fallback if no featured products, get latest 3
+    let productsToDisplay = featuredDb;
+
+    if (productsToDisplay.length < 3) {
+      const remaining = 3 - productsToDisplay.length;
+      const additional = await prisma.product.findMany({
+        where: {
+          id: { notIn: productsToDisplay.map(p => p.id) }
+        },
+        take: remaining,
+        orderBy: { createdAt: 'desc' },
+        include: { variants: true }
+      });
+      productsToDisplay = [...productsToDisplay, ...additional];
+    }
+
+    // Transform for UI (Decimal to Number)
+    products = productsToDisplay.map(p => ({
+      id: p.id,
+      name: p.name,
+      description: p.description || '',
+      images: p.images || [],
+      imageUrl: p.images?.[0] || '', // Backwards compatibility
+      originalPrice: Number(p.originalPrice),
+      discountPrice: p.discountPrice ? Number(p.discountPrice) : null,
+      flowerType: p.flowerType,
+      variants: p.variants.map(v => ({
+        ...v,
+        price: v.price ? Number(v.price) : null,
+        images: v.images || []
+      }))
+    })).filter(p => p.images.length > 0 || p.imageUrl); // Optional: filter out invalids if desired
+
+  } catch (error) {
+    console.error("Failed to load home page products:", error);
+    // Return empty product list on error to allow page to render with message
+    products = [];
+  }
 
   return (
     <main className="min-h-screen">
@@ -82,7 +96,7 @@ export default async function Home() {
           </div>
         ) : (
           <div className="text-center text-gray-500 text-lg">
-            No products currently available or featured.
+            No floral arrangements currently available. Please check back soon!
           </div>
         )}
       </section>
