@@ -27,6 +27,7 @@ model Product {
   CartItem      CartItem[]
   OrderItems    OrderItem[]
   WishlistItems WishlistItem[]
+  questions     ProductQuestion[]
 }
 
 model ProductVariant {
@@ -57,6 +58,8 @@ model User {
   image             String?
   googleId          String?  @unique
   wishlist          Wishlist?
+  messages          OrderMessage[]
+  questions         ProductQuestion[]
 }
 
 model Cart {
@@ -101,6 +104,8 @@ model WishlistItem {
 enum OrderStatus {
   AWAITING_PAYMENT
   PAID
+  PREPARING
+  DELIVERED
   REJECTED
   CANCELED
 }
@@ -116,6 +121,7 @@ model Order {
   receipt     PaymentReceipt?
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
+  messages    OrderMessage[]
 }
 
 enum PaymentMethod {
@@ -134,10 +140,38 @@ model OrderItem {
   selectedColor String?
 }
 
+
 model PaymentReceipt {
   id        String   @id @default(uuid())
   orderId   String   @unique
   order     Order    @relation(fields: [orderId], references: [id])
   imageUrl  String
   uploadedAt DateTime @default(now())
+}
+
+model OrderMessage {
+  id        String   @id @default(uuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  content   String
+  isAdmin   Boolean  @default(false)
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  readAt    DateTime?
+}
+
+model ProductQuestion {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  question  String
+  answer    String?
+  isReadByAdmin Boolean @default(false)
+  isAnswerRead Boolean @default(false)
+  createdAt DateTime @default(now())
+  answeredAt DateTime?
 }

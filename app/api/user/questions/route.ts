@@ -20,23 +20,28 @@ async function getUser() {
 
 export async function GET() {
     const userId = await getUser();
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-    // TODO: Verify admin role. For now, we assume authenticated users are allowed (DEV ONLY).
+    if (!userId) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     try {
-        const orders = await prisma.order.findMany({
+        const questions = await prisma.productQuestion.findMany({
+            where: { userId },
             include: {
-                user: { select: { fullName: true, email: true } },
-                items: { include: { product: true } },
-                receipt: true,
-                messages: { include: { user: { select: { fullName: true } } } }
+                product: {
+                    select: {
+                        id: true,
+                        name: true,
+                        images: true
+                    }
+                }
             },
             orderBy: { createdAt: 'desc' }
         });
 
-        return NextResponse.json({ orders });
+        return NextResponse.json({ questions });
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to fetch admin orders' }, { status: 500 });
+        console.error('Failed to fetch questions:', error);
+        return NextResponse.json({ error: 'Failed to fetch questions' }, { status: 500 });
     }
 }

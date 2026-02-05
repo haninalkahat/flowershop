@@ -78,11 +78,11 @@ export default function Navbar() {
               {showUserDropdown && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-2 animate-fade-in">
                   <Link
-                    href="/orders"
+                    href="/profile"
                     onClick={() => setShowUserDropdown(false)}
                     className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200"
                   >
-                    My Orders
+                    Profile
                   </Link>
                   {user.email === 'llaffashopstore@gmail.com' && (
                     <Link
@@ -147,6 +147,7 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden bg-white border-t border-gray-100 py-4 px-6 space-y-3 shadow-lg absolute w-full left-0 animate-fade-in-up">
           <Link href="/" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>Home</Link>
+          <Link href="/shop" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>Shop</Link>
           <Link href="/about" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>About</Link>
           <Link href="/contact" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>Contact</Link>
           <Link href="/wishlist" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>Wishlist</Link>
@@ -156,7 +157,7 @@ export default function Navbar() {
           {user ? (
             <div className="pt-2 border-t border-gray-100 flex flex-col space-y-2">
               <span className="block text-gray-700 font-medium px-2">{user.fullName}</span>
-              <Link href="/orders" className="block text-gray-600 hover:text-pink-600 py-2 px-2" onClick={() => setIsOpen(false)}>My Orders</Link>
+              <Link href="/profile" className="block text-gray-600 hover:text-pink-600 py-2 px-2" onClick={() => setIsOpen(false)}>Profile</Link>
               {user.email === 'llaffashopstore@gmail.com' && (
                 <Link href="/admin/orders" className="block text-gray-600 hover:text-pink-600 py-2 px-2" onClick={() => setIsOpen(false)}>Admin Panel</Link>
               )}

@@ -15,6 +15,9 @@ const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfa
 export const metadata: Metadata = {
   title: 'Flowershop',
   description: 'A full-stack flower e-commerce website',
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export default function RootLayout({

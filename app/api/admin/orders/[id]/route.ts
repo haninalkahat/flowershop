@@ -29,7 +29,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const { status } = body;
 
     // Validate Status: AWAITING_PAYMENT, PAID, REJECTED, CANCELED
-    const validStatuses = ['AWAITING_PAYMENT', 'PAID', 'REJECTED', 'CANCELED'];
+    const validStatuses = ['AWAITING_PAYMENT', 'PAID', 'PREPARING', 'DELIVERED', 'REJECTED', 'CANCELED'];
 
     if (!validStatuses.includes(status)) {
         return NextResponse.json({ error: 'Invalid status' }, { status: 400 });

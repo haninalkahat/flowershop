@@ -161,6 +161,8 @@ export async function POST(request: Request) {
     }
 }
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     const userId = await getUser();
     if (!userId) {
@@ -174,7 +176,8 @@ export async function GET() {
                 items: {
                     include: { product: true }
                 },
-                receipt: true
+                receipt: true,
+                messages: true
             },
             orderBy: { createdAt: 'desc' }
         });

@@ -280,19 +280,19 @@ export default function ProductDetailClient({ product, initialColor }: { product
                         {/* Actions */}
                         <div className="flex items-center gap-4 border-t border-gray-100 pt-8">
                             {/* Quantity */}
-                            <div className="flex items-center border border-gray-200 rounded-full px-4 py-3 gap-4">
+                            <div className="flex items-center border border-gray-200 rounded-full px-4 py-2 md:px-4 md:py-3 gap-3 md:gap-4">
                                 <button
                                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                                     className="text-gray-400 hover:text-gray-900 transition-colors"
                                 >
-                                    <Minus className="w-4 h-4" />
+                                    <Minus className="w-3.5 h-3.5" />
                                 </button>
-                                <span className="font-bold text-gray-900 w-4 text-center">{quantity}</span>
+                                <span className="font-bold text-gray-900 w-4 text-center text-sm">{quantity}</span>
                                 <button
                                     onClick={() => setQuantity(quantity + 1)}
                                     className="text-gray-400 hover:text-gray-900 transition-colors"
                                 >
-                                    <Plus className="w-4 h-4" />
+                                    <Plus className="w-3.5 h-3.5" />
                                 </button>
                             </div>
 
@@ -300,28 +300,28 @@ export default function ProductDetailClient({ product, initialColor }: { product
                             <button
                                 onClick={handleAddToCart}
                                 disabled={loading}
-                                className={`flex-1 bg-gray-900 text-white font-bold py-4 rounded-full transition-all shadow-lg shadow-gray-200 flex items-center justify-center gap-2 ${loading
+                                className={`flex-1 bg-gray-900 text-white font-bold py-2 md:py-4 px-4 text-xs md:text-base rounded-full transition-all shadow-lg shadow-gray-200 flex items-center justify-center gap-2 ${loading
                                     ? 'opacity-80 cursor-not-allowed scale-[0.98]'
                                     : 'hover:bg-pink-600 hover:shadow-pink-200'
                                     }`}
                             >
                                 {loading ? (
                                     <>
-                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        <Loader2 className="w-3.5 h-3.5 md:w-5 md:h-5 animate-spin" />
                                         <span>Adding...</span>
                                     </>
                                 ) : (
                                     <>
-                                        <ShoppingCart className="w-5 h-5" />
+                                        <ShoppingCart className="w-3.5 h-3.5 md:w-5 md:h-5" />
                                         <span>Add to Cart - ${(currentPrice * quantity).toFixed(2)}</span>
                                     </>
                                 )}
                             </button>
                             <button
                                 onClick={toggleWishlist}
-                                className={`p-4 rounded-full border transition-all ${isFavorite ? 'bg-pink-50 border-pink-200 text-pink-500' : 'border-gray-200 hover:border-pink-300 text-gray-400 hover:text-pink-500'}`}
+                                className={`p-2 md:p-4 rounded-full border transition-all flex items-center justify-center ${isFavorite ? 'bg-pink-50 border-pink-200 text-pink-500' : 'border-gray-200 hover:border-pink-300 text-gray-400 hover:text-pink-500'}`}
                             >
-                                <Heart className={`w-6 h-6 ${isFavorite ? 'fill-pink-500' : ''}`} />
+                                <Heart className={`w-4 h-4 md:w-6 md:h-6 ${isFavorite ? 'fill-pink-500' : ''}`} />
                             </button>
                         </div>
                     </div>
