@@ -24,8 +24,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         const questions = await prisma.productQuestion.findMany({
             where: { productId: id },
             include: { user: { select: { fullName: true } } },
-            orderBy: { createdAt: 'desc' },
-            take: 3 // Initially fetch 3 as per requirement, but client might fetch more
+            orderBy: { createdAt: 'desc' }
         });
         return NextResponse.json(questions);
     } catch (error) {

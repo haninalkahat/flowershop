@@ -3,6 +3,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { MessageCircle } from 'lucide-react';
 
 interface Question {
     id: string;
@@ -82,12 +83,13 @@ export default function ProductQuestions({ productId }: ProductQuestionsProps) {
 
     return (
         <div className="mt-12 border-t pt-8">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 <h3 className="text-2xl font-serif font-bold text-gray-800">{t('title')}</h3>
                 <button
                     onClick={() => setShowForm(!showForm)}
-                    className="border border-gray-300 px-4 py-2 rounded hover:bg-gray-50 transition"
+                    className="w-full md:w-auto bg-white border-2 border-gray-100 px-6 py-3 rounded-xl font-medium text-gray-900 hover:border-pink-500 hover:text-pink-600 transition-all shadow-sm flex items-center justify-center gap-2"
                 >
+                    <MessageCircle size={18} />
                     {t('askQuestion')}
                 </button>
             </div>
@@ -163,6 +165,8 @@ export default function ProductQuestions({ productId }: ProductQuestionsProps) {
                     </button>
                 </div>
             )}
+
+
         </div>
     );
 }
