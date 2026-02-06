@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useCart, Product } from '@/context/CartContext';
 import { toast } from 'react-hot-toast';
 import { Loader2, Heart } from 'lucide-react';
 import { useWishlist } from '@/context/WishlistContext';
+
+import { useTranslations } from 'next-intl';
 
 interface ProductCardProps {
     product: Product;
@@ -14,6 +16,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, priority = false }: ProductCardProps) {
+    const t = useTranslations('Product');
     const { addToCart } = useCart();
     const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
     const isFavorite = isInWishlist(product.id);
@@ -111,10 +114,10 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
                         {loading ? (
                             <>
                                 <Loader2 className="w-3 h-3 animate-spin" />
-                                <span>Adding...</span>
+                                <span>{t('adding')}</span>
                             </>
                         ) : (
-                            'Add to Cart'
+                            t('addToCart')
                         )}
                     </button>
 

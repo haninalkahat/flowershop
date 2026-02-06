@@ -1,18 +1,34 @@
 'use client';
 
-import Link from 'next/link';
-import { Flower, ShoppingCart, User, ChevronDown, Heart } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { Link, usePathname, useRouter } from '@/i18n/navigation';
+import { Flower, ShoppingCart, User, ChevronDown, Heart, Globe, Check } from 'lucide-react';
+import { useState, useRef, useEffect, useTransition } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { useLocale, useTranslations } from 'next-intl';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [showLangDropdown, setShowLangDropdown] = useState(false);
+  const [showMobileLangDropdown, setShowMobileLangDropdown] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [animateCart, setAnimateCart] = useState(false);
   const { cart, getTotalItems } = useCart();
   const { user, logout } = useAuth();
+
+  // i18n hooks
+  const locale = useLocale();
+  const t = useTranslations('Navigation');
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
+
+  const switchLocale = (newLocale: string) => {
+    startTransition(() => {
+      router.replace(pathname, { locale: newLocale });
+    });
+  };
 
   useEffect(() => {
     if (getTotalItems() > 0) {
@@ -22,6 +38,8 @@ export default function Navbar() {
     }
   }, [cart]); // Animate when cart changes
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const langDropdownRef = useRef<HTMLDivElement>(null);
+  const mobileLangDropdownRef = useRef<HTMLDivElement>(null);
 
   // Prevent hydration mismatch
   useEffect(() => {
@@ -33,6 +51,12 @@ export default function Navbar() {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowUserDropdown(false);
+      }
+      if (langDropdownRef.current && !langDropdownRef.current.contains(event.target as Node)) {
+        setShowLangDropdown(false);
+      }
+      if (mobileLangDropdownRef.current && !mobileLangDropdownRef.current.contains(event.target as Node)) {
+        setShowMobileLangDropdown(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -51,19 +75,56 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex items-center space-x-8">
+        <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
           <Link href="/" className="text-gray-600 hover:text-pink-600 font-medium transition-colors duration-200">
-            Home
+            {t('home')}
           </Link>
           <Link href="/about" className="text-gray-600 hover:text-pink-600 font-medium transition-colors duration-200">
-            About
+            {t('about')}
           </Link>
           <Link href="/shop" className="text-gray-600 hover:text-pink-600 font-medium transition-colors duration-200">
-            Shop
+            {t('shop')}
           </Link>
           <Link href="/contact" className="text-gray-600 hover:text-pink-600 font-medium transition-colors duration-200">
-            Contact
+            {t('contact')}
           </Link>
+
+          {/* Language Switcher */}
+          <div className="relative border-l pl-4 border-gray-200" ref={langDropdownRef}>
+            <button
+              onClick={() => setShowLangDropdown(!showLangDropdown)}
+              className="flex items-center gap-1 text-gray-500 hover:text-pink-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+            >
+              <Globe className="w-5 h-5" />
+            </button>
+
+            {showLangDropdown && (
+              <div className={`absolute mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-100 py-2 animate-fade-in z-50 ${locale === 'ar' ? 'left-0' : 'right-0'}`}>
+                <button
+                  onClick={() => { switchLocale('tr'); setShowLangDropdown(false); }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200 flex items-center justify-between group"
+                >
+                  <span>Türkçe</span>
+                  {locale === 'tr' && <Check className="w-4 h-4 text-pink-600" />}
+                </button>
+                <button
+                  onClick={() => { switchLocale('en'); setShowLangDropdown(false); }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200 flex items-center justify-between group"
+                >
+                  <span>English</span>
+                  {locale === 'en' && <Check className="w-4 h-4 text-pink-600" />}
+                </button>
+                <button
+                  onClick={() => { switchLocale('ar'); setShowLangDropdown(false); }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200 flex items-center justify-between group"
+                >
+                  <span>العربية</span>
+                  {locale === 'ar' && <Check className="w-4 h-4 text-pink-600" />}
+                </button>
+              </div>
+            )}
+          </div>
+
           {user ? (
             <div className="relative" ref={dropdownRef}>
               <button
@@ -76,13 +137,13 @@ export default function Navbar() {
               </button>
 
               {showUserDropdown && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-2 animate-fade-in">
+                <div className={`absolute mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-2 animate-fade-in ${locale === 'ar' ? 'left-0' : 'right-0'}`}>
                   <Link
                     href="/profile"
                     onClick={() => setShowUserDropdown(false)}
                     className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200"
                   >
-                    Profile
+                    {t('profile')}
                   </Link>
                   {user.email === 'llaffashopstore@gmail.com' && (
                     <Link
@@ -90,21 +151,21 @@ export default function Navbar() {
                       onClick={() => setShowUserDropdown(false)}
                       className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200"
                     >
-                      Admin Panel
+                      {t('adminPanel')}
                     </Link>
                   )}
                   <button
                     onClick={() => { logout(); setShowUserDropdown(false); }}
                     className="w-full text-left px-4 py-2 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200"
                   >
-                    Logout
+                    {t('logout')}
                   </button>
                 </div>
               )}
             </div>
           ) : (
-            <Link href="/login" className="px-5 py-2.5 rounded-full bg-pink-600 text-white font-medium hover:bg-pink-700 transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5">
-              Sign In / Up
+            <Link href="/login" className="px-5 py-2.5 rounded-full bg-pink-600 text-white font-medium hover:bg-pink-700 transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 whitespace-nowrap">
+              {t('signup')}
             </Link>
           )}
 
@@ -132,7 +193,43 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Menu Button */}
-        <div className="md:hidden">
+        <div className="md:hidden flex items-center gap-4">
+          {/* Mobile Lang Switcher */}
+          <div className="relative" ref={mobileLangDropdownRef}>
+            <button
+              onClick={() => setShowMobileLangDropdown(!showMobileLangDropdown)}
+              className="flex items-center gap-1 text-gray-500 hover:text-pink-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+            >
+              <Globe className="w-5 h-5" />
+            </button>
+
+            {showMobileLangDropdown && (
+              <div className={`absolute mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-100 py-2 animate-fade-in z-50 top-full ${locale === 'ar' ? 'left-0' : 'right-0'}`}>
+                <button
+                  onClick={() => { switchLocale('tr'); setShowMobileLangDropdown(false); }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200 flex items-center justify-between group"
+                >
+                  <span>Türkçe</span>
+                  {locale === 'tr' && <Check className="w-4 h-4 text-pink-600" />}
+                </button>
+                <button
+                  onClick={() => { switchLocale('en'); setShowMobileLangDropdown(false); }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200 flex items-center justify-between group"
+                >
+                  <span>English</span>
+                  {locale === 'en' && <Check className="w-4 h-4 text-pink-600" />}
+                </button>
+                <button
+                  onClick={() => { switchLocale('ar'); setShowMobileLangDropdown(false); }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200 flex items-center justify-between group"
+                >
+                  <span>العربية</span>
+                  {locale === 'ar' && <Check className="w-4 h-4 text-pink-600" />}
+                </button>
+              </div>
+            )}
+          </div>
+
           <button onClick={() => setIsOpen(!isOpen)} className="text-gray-600 hover:text-pink-600 focus:outline-none">
             {isOpen ? (
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -145,29 +242,29 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 py-4 px-6 space-y-3 shadow-lg absolute w-full left-0 animate-fade-in-up">
-          <Link href="/" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>Home</Link>
-          <Link href="/shop" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>Shop</Link>
-          <Link href="/about" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>About</Link>
-          <Link href="/contact" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>Contact</Link>
+        <div className="md:hidden bg-white border-t border-gray-100 py-4 px-6 space-y-3 shadow-lg absolute w-full left-0 animate-fade-in-up z-50">
+          <Link href="/" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>{t('home')}</Link>
+          <Link href="/shop" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>{t('shop')}</Link>
+          <Link href="/about" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>{t('about')}</Link>
+          <Link href="/contact" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>{t('contact')}</Link>
           <Link href="/wishlist" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>Wishlist</Link>
           <Link href="/cart" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>
-            Cart ({getTotalItems()})
+            {t('cart')} ({getTotalItems()})
           </Link>
           {user ? (
             <div className="pt-2 border-t border-gray-100 flex flex-col space-y-2">
               <span className="block text-gray-700 font-medium px-2">{user.fullName}</span>
-              <Link href="/profile" className="block text-gray-600 hover:text-pink-600 py-2 px-2" onClick={() => setIsOpen(false)}>Profile</Link>
+              <Link href="/profile" className="block text-gray-600 hover:text-pink-600 py-2 px-2" onClick={() => setIsOpen(false)}>{t('profile')}</Link>
               {user.email === 'llaffashopstore@gmail.com' && (
-                <Link href="/admin/orders" className="block text-gray-600 hover:text-pink-600 py-2 px-2" onClick={() => setIsOpen(false)}>Admin Panel</Link>
+                <Link href="/admin/orders" className="block text-gray-600 hover:text-pink-600 py-2 px-2" onClick={() => setIsOpen(false)}>{t('adminPanel')}</Link>
               )}
               <button onClick={() => { logout(); setIsOpen(false); }} className="block w-full text-left text-pink-600 font-medium py-2 px-2 hover:bg-pink-50 rounded">
-                Logout
+                {t('logout')}
               </button>
             </div>
           ) : (
             <Link href="/login" className="block text-center mt-4 w-full py-2.5 rounded-full bg-pink-600 text-white font-medium hover:bg-pink-700" onClick={() => setIsOpen(false)}>
-              Sign In / Up
+              {t('signup')}
             </Link>
           )}
         </div>
