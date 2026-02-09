@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import { WishlistProvider } from '@/context/WishlistContext';
 import { CartProvider } from '@/context/CartContext';
 import { AuthProvider } from '@/context/AuthContext';
+import { CurrencyProvider } from '@/context/CurrencyContext';
 import { Toaster } from 'react-hot-toast';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
@@ -45,12 +46,14 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <AuthProvider>
             <CartProvider>
-              <WishlistProvider>
-                <Toaster position="top-center" toastOptions={{ duration: 3000, style: { background: '#333', color: '#fff' } }} />
-                <Navbar />
-                {children}
-                <Footer />
-              </WishlistProvider>
+              <CurrencyProvider>
+                <WishlistProvider>
+                  <Toaster position="top-center" toastOptions={{ duration: 3000, style: { background: '#333', color: '#fff' } }} />
+                  <Navbar />
+                  {children}
+                  <Footer />
+                </WishlistProvider>
+              </CurrencyProvider>
             </CartProvider>
           </AuthProvider>
         </NextIntlClientProvider>

@@ -4,11 +4,12 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { useCart, Product } from '@/context/CartContext';
+import { useCurrency } from '@/context/CurrencyContext'; // Added
 import { toast } from 'react-hot-toast';
 import { Loader2, Heart } from 'lucide-react';
 import { useWishlist } from '@/context/WishlistContext';
 
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface ProductCardProps {
     product: Product;
@@ -17,7 +18,26 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, priority = false }: ProductCardProps) {
     const t = useTranslations('Product');
+    const locale = useLocale();
     const { addToCart } = useCart();
+    const { formatPrice } = useCurrency(); // Added
+
+    const getName = () => {
+        if (locale === 'tr' && product.name_tr) return product.name_tr;
+        if (locale === 'ar' && product.name_ar) return product.name_ar;
+        if (locale === 'en' && product.name_en) return product.name_en;
+        return product.name;
+    };
+
+    const getDescription = () => {
+        if (locale === 'tr' && product.description_tr) return product.description_tr;
+        if (locale === 'ar' && product.description_ar) return product.description_ar;
+        if (locale === 'en' && product.description_en) return product.description_en;
+        return product.description;
+    };
+
+    const displayName = getName();
+    const displayDescription = getDescription();
     const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
     const isFavorite = isInWishlist(product.id);
     const [loading, setLoading] = useState(false);
@@ -62,7 +82,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             <Link href={getProductLink()} className="block relative w-full aspect-square bg-[#F9F9F9] cursor-pointer overflow-hidden p-6">
                 <Image
                     src={product.images?.[0] || product.imageUrl || '/placeholder.jpg'}
-                    alt={product.name}
+                    alt={displayName}
                     fill
                     priority={!!priority}
                     className="object-contain group-hover:scale-110 transition-transform duration-500"
@@ -78,10 +98,10 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             <div className="p-4 text-center flex-grow flex flex-col justify-between">
                 <div>
                     <Link href={getProductLink()}>
-                        <h3 className="text-base font-semibold text-pink-700 mb-1 font-serif hover:text-pink-900 transition-colors line-clamp-1">{product.name}</h3>
+                        <h3 className="text-base font-semibold text-pink-700 mb-1 font-serif hover:text-pink-900 transition-colors line-clamp-1">{displayName}</h3>
                     </Link>
-                    {product.description && (
-                        <p className="text-gray-600 mb-3 text-xs line-clamp-2">{product.description}</p>
+                    {displayDescription && (
+                        <p className="text-gray-600 mb-3 text-xs line-clamp-2">{displayDescription}</p>
                     )}
                 </div>
                 {product.variants && product.variants.length > 0 && (
@@ -103,7 +123,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
                 )}
                 <div>
                     <span className="text-lg font-bold text-pink-600 block mb-3">
-                        ${displayPrice.toFixed(2)}
+                        {formatPrice(displayPrice)}
                     </span>
                     <button
                         onClick={handleAddToCart}

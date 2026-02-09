@@ -2,6 +2,7 @@
 
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { useCurrency } from '@/context/CurrencyContext'; // Added
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -10,6 +11,7 @@ import { useTranslations } from 'next-intl';
 export default function CartPage() {
   const { cart, updateCartItemQuantity, removeFromCart, getTotalPrice } = useCart();
   const { user } = useAuth();
+  const { formatPrice } = useCurrency(); // Added
   const router = useRouter();
   const t = useTranslations('Cart');
 
@@ -76,14 +78,14 @@ export default function CartPage() {
                   )}
                   {/* Mobile Only: Price inside this block for better vertical stacking */}
                   <div className="md:hidden mt-2 font-medium text-pink-700">
-                    ${price.toFixed(2)}
+                    {formatPrice(price)}
                   </div>
                 </div>
               </div>
 
               {/* Price (Desktop) */}
               <div className="hidden md:block text-center text-gray-900">
-                ${price.toFixed(2)}
+                {formatPrice(price)}
               </div>
 
               {/* Quantity Controls - Row on Mobile between Image/Title and Total */}
@@ -116,7 +118,7 @@ export default function CartPage() {
               {/* Total */}
               <div className="w-full md:w-auto flex justify-between md:block text-center font-bold text-pink-600 mt-2 md:mt-0 border-t md:border-t-0 pt-2 md:pt-0 border-dashed">
                 <span className="md:hidden font-semibold text-gray-600">{t('subtotal')}:</span>
-                ${(price * item.quantity).toFixed(2)}
+                {formatPrice(price * item.quantity)}
               </div>
             </div>
           );
@@ -130,7 +132,7 @@ export default function CartPage() {
           </Link>
           <div className="flex flex-col items-center md:items-end w-full md:w-auto order-1 md:order-2">
             <span className="text-lg text-gray-600 mb-2 text-center md:text-right w-full block">{t('subtotal')}</span>
-            <p className="text-3xl md:text-4xl font-bold text-pink-700 mb-6 text-center md:text-right w-full">${getTotalPrice().toFixed(2)}</p>
+            <p className="text-3xl md:text-4xl font-bold text-pink-700 mb-6 text-center md:text-right w-full">{formatPrice(getTotalPrice())}</p>
             <button
               onClick={handleCheckout}
               className="w-full md:w-auto bg-pink-600 text-white px-10 py-3 rounded-full font-bold hover:bg-pink-700 transition-all shadow-lg transform hover:-translate-y-1 active:scale-95 flex justify-center items-center"

@@ -40,6 +40,8 @@ export default function ProfilePage() {
     const [sendingMessage, setSendingMessage] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
 
+    const lastActionTime = React.useRef(0);
+
     useEffect(() => {
         if (!authLoading && !user) {
             router.push('/login');
@@ -74,7 +76,7 @@ export default function ProfilePage() {
 
         // Count unread question answers
         questions.forEach(q => {
-            if (q.answer && !q.isAnswerRead) {
+            if (q.answer && !q.isRead) { // Changed q.isAnswerRead to q.isRead
                 count++;
             }
         });
@@ -82,11 +84,47 @@ export default function ProfilePage() {
         setUnreadCount(count);
     }, [orders, questions]);
 
+    // Mark questions as read when tab is opened
+    useEffect(() => {
+        if (activeTab === 'questions') {
+            const hasUnreadQuestions = questions.some(q => q.answer && !q.isRead);
+            if (hasUnreadQuestions) {
+                markQuestionsAsRead();
+            }
+        }
+    }, [activeTab, questions]);
+
+    const markQuestionsAsRead = async () => {
+        lastActionTime.current = Date.now(); // Record action time
+        // Optimistically update
+        setQuestions(prev => prev.map(q => q.answer ? { ...q, isRead: true } : q));
+
+        try {
+            const res = await fetch('/api/user/questions/read', { method: 'POST' });
+            if (res.ok) {
+                // Re-fetch to ensure sync with DB, but only after success
+                await fetchQuestions();
+            } else {
+                console.error('Failed to mark read, status:', res.status);
+            }
+        } catch (error) {
+            console.error('Failed to mark questions as read', error);
+        }
+    };
+
     // Polling for real-time updates and notifications
     useEffect(() => {
         if (!user) return;
 
         const interval = setInterval(() => {
+            // Prevent polling from overwriting optimistic state if we just updated
+            if (Date.now() - lastActionTime.current < 10000) {
+                return;
+            }
+
+            // Only poll if we are NOT in the questions tab, OR if we are, we don't think there are unread things that we just cleared
+            // Actually, simplest is to just let it poll, but rely on the fact that if we marked it as read, the backend should eventually say so.
+            // The issue is race condition.
             fetchOrders(true);
             fetchQuestions();
         }, 15000); // 15s polling
@@ -489,7 +527,7 @@ export default function ProfilePage() {
                                                     );
                                                 } else {
                                                     const q = item.data;
-                                                    const hasUnread = q.answer && !q.isAnswerRead;
+                                                    const hasUnread = q.answer && !q.isRead; // Changed q.isAnswerRead to q.isRead
                                                     return (
                                                         <div key={`question-${q.id}`} className={`border rounded-xl p-6 hover:shadow-md transition-all ${hasUnread ? 'bg-pink-50 border-pink-200' : 'bg-white border-gray-200'}`}>
                                                             <div className="flex gap-4 items-start">

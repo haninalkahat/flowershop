@@ -5,17 +5,21 @@ import { Flower, ShoppingCart, User, ChevronDown, Heart, Globe, Check } from 'lu
 import { useState, useRef, useEffect, useTransition } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { useCurrency, Currency } from '@/context/CurrencyContext'; // Added
 import { useLocale, useTranslations } from 'next-intl';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showLangDropdown, setShowLangDropdown] = useState(false);
+  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false); // Added
   const [showMobileLangDropdown, setShowMobileLangDropdown] = useState(false);
+  const [showMobileCurrencyDropdown, setShowMobileCurrencyDropdown] = useState(false); // Added
   const [mounted, setMounted] = useState(false);
   const [animateCart, setAnimateCart] = useState(false);
   const { cart, getTotalItems } = useCart();
   const { user, logout } = useAuth();
+  const { currency, setCurrency } = useCurrency(); // Added
 
   // i18n hooks
   const locale = useLocale();
@@ -39,7 +43,9 @@ export default function Navbar() {
   }, [cart]); // Animate when cart changes
   const dropdownRef = useRef<HTMLDivElement>(null);
   const langDropdownRef = useRef<HTMLDivElement>(null);
+  const currencyDropdownRef = useRef<HTMLDivElement>(null); // Added
   const mobileLangDropdownRef = useRef<HTMLDivElement>(null);
+  const mobileCurrencyDropdownRef = useRef<HTMLDivElement>(null); // Added
 
   // Prevent hydration mismatch
   useEffect(() => {
@@ -55,8 +61,14 @@ export default function Navbar() {
       if (langDropdownRef.current && !langDropdownRef.current.contains(event.target as Node)) {
         setShowLangDropdown(false);
       }
+      if (currencyDropdownRef.current && !currencyDropdownRef.current.contains(event.target as Node)) {
+        setShowCurrencyDropdown(false);
+      }
       if (mobileLangDropdownRef.current && !mobileLangDropdownRef.current.contains(event.target as Node)) {
         setShowMobileLangDropdown(false);
+      }
+      if (mobileCurrencyDropdownRef.current && !mobileCurrencyDropdownRef.current.contains(event.target as Node)) {
+        setShowMobileCurrencyDropdown(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -121,6 +133,32 @@ export default function Navbar() {
                   <span>العربية</span>
                   {locale === 'ar' && <Check className="w-4 h-4 text-pink-600" />}
                 </button>
+              </div>
+            )}
+          </div>
+
+          {/* Currency Switcher */}
+          <div className="relative border-l pl-4 border-gray-200" ref={currencyDropdownRef}>
+            <button
+              onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
+              className="flex items-center gap-1 text-gray-500 hover:text-pink-600 transition-colors p-1 rounded-full hover:bg-gray-100 font-medium text-sm"
+            >
+              {currency}
+              <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showCurrencyDropdown ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showCurrencyDropdown && (
+              <div className={`absolute mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-100 py-2 animate-fade-in z-50 ${locale === 'ar' ? 'left-0' : 'right-0'}`}>
+                {['USD', 'TRY', 'SAR'].map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => { setCurrency(c as Currency); setShowCurrencyDropdown(false); }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200 flex items-center justify-between group"
+                  >
+                    <span>{c}</span>
+                    {currency === c && <Check className="w-4 h-4 text-pink-600" />}
+                  </button>
+                ))}
               </div>
             )}
           </div>
@@ -193,7 +231,32 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Menu Button */}
-        <div className="md:hidden flex items-center gap-4">
+        <div className="md:hidden flex items-center gap-2">
+          {/* Mobile Currency Switcher */}
+          <div className="relative" ref={mobileCurrencyDropdownRef}>
+            <button
+              onClick={() => setShowMobileCurrencyDropdown(!showMobileCurrencyDropdown)}
+              className="flex items-center gap-1 text-gray-500 hover:text-pink-600 transition-colors p-1 rounded-full hover:bg-gray-100 font-medium text-xs"
+            >
+              {currency}
+            </button>
+
+            {showMobileCurrencyDropdown && (
+              <div className={`absolute mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-100 py-2 animate-fade-in z-50 top-full ${locale === 'ar' ? 'left-0' : 'right-0'}`}>
+                {['USD', 'TRY', 'SAR'].map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => { setCurrency(c as Currency); setShowMobileCurrencyDropdown(false); }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200 flex items-center justify-between group"
+                  >
+                    <span>{c}</span>
+                    {currency === c && <Check className="w-4 h-4 text-pink-600" />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Mobile Lang Switcher */}
           <div className="relative" ref={mobileLangDropdownRef}>
             <button

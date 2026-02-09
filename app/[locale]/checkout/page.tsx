@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react';
 import { useCart } from '@/context/CartContext';
+import { useCurrency } from '@/context/CurrencyContext'; // Added
 import { useRouter } from '@/i18n/navigation';
 import { Copy, Upload, CheckCircle, AlertCircle } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
@@ -10,6 +11,7 @@ import { useTranslations } from 'next-intl';
 
 export default function CheckoutPage() {
     const { cart, getTotalPrice, clearCart } = useCart();
+    const { formatPrice } = useCurrency(); // Added
     const router = useRouter();
     const t = useTranslations('Checkout');
     const [paymentMethod, setPaymentMethod] = useState<'BANK_TRANSFER' | 'WESTERN_UNION'>('BANK_TRANSFER');
@@ -128,14 +130,14 @@ export default function CheckoutPage() {
                                     </span>
                                 </div>
                                 <div className="text-left rtl:text-right">
-                                    <span>${(item.discountPrice || item.originalPrice).toFixed(2)}</span>
+                                    <span>{formatPrice(item.discountPrice || item.originalPrice)}</span>
                                 </div>
                             </div>
                         ))}
                     </div>
                     <div className="border-t pt-4 flex justify-between font-bold text-lg">
                         <span>{t('total')}</span>
-                        <span>${getTotalPrice().toFixed(2)}</span>
+                        <span>{formatPrice(getTotalPrice())}</span>
                     </div>
                 </div>
 

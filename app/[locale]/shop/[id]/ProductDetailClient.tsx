@@ -2,10 +2,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
+import { useCurrency } from '@/context/CurrencyContext'; // Added
 import { ArrowLeft, Minus, Plus, ShoppingCart, Star, Loader2, Heart } from 'lucide-react';
 import { useWishlist } from '@/context/WishlistContext';
 import { toast } from 'react-hot-toast';
@@ -14,7 +15,28 @@ import ProductReviews from '@/components/ProductReviews';
 
 export default function ProductDetailClient({ product, initialColor }: { product: any, initialColor?: string }) {
     const t = useTranslations('Product');
+    const locale = useLocale();
+
+    // Localized Name/Description Helpers
+    const getName = () => {
+        if (locale === 'tr' && product.name_tr) return product.name_tr;
+        if (locale === 'ar' && product.name_ar) return product.name_ar;
+        if (locale === 'en' && product.name_en) return product.name_en;
+        return product.name;
+    };
+
+    const getDescription = () => {
+        if (locale === 'tr' && product.description_tr) return product.description_tr;
+        if (locale === 'ar' && product.description_ar) return product.description_ar;
+        if (locale === 'en' && product.description_en) return product.description_en;
+        return product.description;
+    };
+
+    const displayName = getName();
+    const displayDescription = getDescription();
+
     const { addToCart } = useCart();
+    const { formatPrice } = useCurrency(); // Added
     const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
     const isFavorite = isInWishlist(product.id);
 
@@ -138,8 +160,8 @@ export default function ProductDetailClient({ product, initialColor }: { product
 
             addToCart({
                 id: product.id,
-                name: product.name,
-                description: product.description,
+                name: displayName,
+                description: displayDescription,
                 imageUrl: mainImage,
                 // Override original price with current calculated price (variant or base)
                 originalPrice: currentPrice,
@@ -149,7 +171,7 @@ export default function ProductDetailClient({ product, initialColor }: { product
                 selectedColor: selectedColor !== 'Original' ? selectedColor : undefined
             }, quantity);
 
-            toast.success(`${product.name} added to cart! 🌸`);
+            toast.success(`${displayName} added to cart! 🌸`);
         } catch (error) {
             toast.error('Could not add to cart. Please try again.');
         } finally {
@@ -167,7 +189,7 @@ export default function ProductDetailClient({ product, initialColor }: { product
                         Back to Shop
                     </Link>
                     <span>/</span>
-                    <span className="text-gray-900 font-medium truncate">{product.name}</span>
+                    <span className="text-gray-900 font-medium truncate">{displayName}</span>
                 </nav>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
@@ -177,7 +199,7 @@ export default function ProductDetailClient({ product, initialColor }: { product
                         <div className="relative w-full aspect-square bg-[#F9F9F9] rounded-3xl overflow-hidden shadow-sm border border-gray-100/50 group">
                             <Image
                                 src={mainImage || '/placeholder.jpg'}
-                                alt={product.name}
+                                alt={displayName}
                                 fill
                                 priority
                                 className="object-contain p-6 group-hover:scale-105 transition-transform duration-700 ease-in-out"
@@ -221,19 +243,19 @@ export default function ProductDetailClient({ product, initialColor }: { product
                             {product.flowerType}
                         </span>
                         <h1 className="text-4xl md:text-5xl font-bold font-serif text-gray-900 mb-4 leading-tight">
-                            {product.name}
+                            {displayName}
                         </h1>
 
                         <div className="flex items-center gap-4 mb-6">
                             <span className="text-3xl font-medium text-gray-900">
-                                ${currentPrice.toFixed(2)}
+                                {formatPrice(currentPrice)}
                             </span>
                             {/* Only show "sale" price if we are NOT on a variant specific upgrade that might hide the discount logic, 
                                or if the base product had a discount. Complex logic... 
                                For now, simplified: show current price as the price. */}
                             {!selectedVariant && product.discountPrice && (
                                 <span className="text-xl text-gray-300 line-through">
-                                    ${Number(product.originalPrice).toFixed(2)}
+                                    {formatPrice(Number(product.originalPrice))}
                                 </span>
                             )}
                             <div className="flex items-center gap-1 ml-auto">
@@ -244,7 +266,7 @@ export default function ProductDetailClient({ product, initialColor }: { product
                         </div>
 
                         <p className="text-gray-600 text-lg leading-relaxed mb-8 font-light">
-                            {product.description}
+                            {displayDescription}
                         </p>
 
                         {/* Specifications */}
@@ -334,7 +356,7 @@ export default function ProductDetailClient({ product, initialColor }: { product
                                 ) : (
                                     <>
                                         <ShoppingCart className="w-3.5 h-3.5 md:w-5 md:h-5" />
-                                        <span>{t('addToCart')} - ${(currentPrice * quantity).toFixed(2)}</span>
+                                        <span>{t('addToCart')} - {formatPrice(currentPrice * quantity)}</span>
                                     </>
                                 )}
                             </button>

@@ -14,8 +14,12 @@ export default function NewProductPage() {
 
     // Product State
     const [formData, setFormData] = useState({
-        name: '',
-        description: '',
+        name_tr: '',
+        name_en: '',
+        name_ar: '',
+        description_tr: '',
+        description_en: '',
+        description_ar: '',
         originalPrice: '',
         flowerType: 'Rose',
         origin: 'Holland',
@@ -56,8 +60,15 @@ export default function NewProductPage() {
 
         setLoading(true);
         const data = new FormData();
-        data.append('name', formData.name);
-        data.append('description', formData.description);
+        data.append('name_tr', formData.name_tr);
+        data.append('name_en', formData.name_en);
+        data.append('name_ar', formData.name_ar);
+        data.append('description_tr', formData.description_tr);
+        data.append('description_en', formData.description_en);
+        data.append('description_ar', formData.description_ar);
+        // Fallback for legacy fields
+        data.append('name', formData.name_en || formData.name_tr || formData.name_ar);
+        data.append('description', formData.description_en || formData.description_tr || formData.description_ar);
         data.append('originalPrice', formData.originalPrice);
         data.append('flowerType', formData.flowerType);
         data.append('origin', formData.origin);
@@ -121,15 +132,32 @@ export default function NewProductPage() {
                     <h2 className="text-xl font-semibold text-gray-700 border-b pb-2 text-left rtl:text-right">{t('basicInfo')}</h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1 text-left rtl:text-right">{t('productName')}</label>
-                            <input
-                                required
-                                type="text"
-                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all text-left rtl:text-right"
-                                value={formData.name}
-                                onChange={e => setFormData({ ...formData, name: e.target.value })}
-                            />
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1 text-left rtl:text-right">{t('productName')} (TR / EN / AR)</label>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <input
+                                    type="text"
+                                    placeholder="Turkish Name"
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all text-left"
+                                    value={formData.name_tr}
+                                    onChange={e => setFormData({ ...formData, name_tr: e.target.value })}
+                                />
+                                <input
+                                    required
+                                    type="text"
+                                    placeholder="English Name"
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all text-left"
+                                    value={formData.name_en}
+                                    onChange={e => setFormData({ ...formData, name_en: e.target.value })}
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Arabic Name"
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all text-right"
+                                    value={formData.name_ar}
+                                    onChange={e => setFormData({ ...formData, name_ar: e.target.value })}
+                                />
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1 text-left rtl:text-right">{t('price')}</label>
@@ -169,14 +197,31 @@ export default function NewProductPage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1 text-left rtl:text-right">{t('description')}</label>
-                        <textarea
-                            required
-                            rows={4}
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all text-left rtl:text-right"
-                            value={formData.description}
-                            onChange={e => setFormData({ ...formData, description: e.target.value })}
-                        />
+                        <label className="block text-sm font-medium text-gray-700 mb-1 text-left rtl:text-right">{t('description')} (TR / EN / AR)</label>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <textarea
+                                rows={4}
+                                placeholder="Turkish Description"
+                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all text-left"
+                                value={formData.description_tr}
+                                onChange={e => setFormData({ ...formData, description_tr: e.target.value })}
+                            />
+                            <textarea
+                                required
+                                rows={4}
+                                placeholder="English Description"
+                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all text-left"
+                                value={formData.description_en}
+                                onChange={e => setFormData({ ...formData, description_en: e.target.value })}
+                            />
+                            <textarea
+                                rows={4}
+                                placeholder="Arabic Description"
+                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all text-right"
+                                value={formData.description_ar}
+                                onChange={e => setFormData({ ...formData, description_ar: e.target.value })}
+                            />
+                        </div>
                     </div>
                 </div>
 

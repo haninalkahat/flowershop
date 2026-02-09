@@ -5,11 +5,37 @@ import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { ShoppingBag, Package, MessageCircle, ArrowLeft } from 'lucide-react';
 
+import { useState, useEffect } from 'react';
+
 export default function AdminSidebar() {
     const t = useTranslations('Admin');
     const pathname = usePathname();
 
     const isActive = (path: string) => pathname === path || pathname?.startsWith(path + '/');
+
+    const [stats, setStats] = useState({ newOrdersCount: 0, unreadMessagesCount: 0 });
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const res = await fetch('/api/admin/stats');
+                if (res.ok) {
+                    const data = await res.json();
+                    setStats(data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch admin stats');
+            }
+        };
+
+        fetchStats();
+        const interval = setInterval(fetchStats, 30000); // Poll every 30s
+        window.addEventListener('admin-stats-updated', fetchStats);
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('admin-stats-updated', fetchStats);
+        };
+    }, []);
 
     return (
         <aside className="hidden md:flex flex-col w-64 bg-white shadow-md min-h-screen sticky top-0 h-screen border-r border-gray-100">
@@ -19,10 +45,22 @@ export default function AdminSidebar() {
             <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
                 <Link
                     href="/admin/orders"
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${isActive('/admin/orders') ? 'bg-pink-50 text-pink-700' : 'text-gray-700 hover:bg-pink-50 hover:text-pink-700'}`}
+                    onClick={() => {
+                        if (isActive('/admin/orders')) {
+                            window.location.reload();
+                        }
+                    }}
+                    className={`flex items-center justify-between px-4 py-3 rounded-lg font-medium transition-colors ${isActive('/admin/orders') ? 'bg-pink-50 text-pink-700' : 'text-gray-700 hover:bg-pink-50 hover:text-pink-700'}`}
                 >
-                    <ShoppingBag size={20} />
-                    {t('orders')}
+                    <div className="flex items-center gap-3">
+                        <ShoppingBag size={20} />
+                        {t('orders')}
+                    </div>
+                    {(stats.newOrdersCount + stats.unreadMessagesCount) > 0 && (
+                        <span className="bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                            {stats.newOrdersCount + stats.unreadMessagesCount}
+                        </span>
+                    )}
                 </Link>
                 <Link
                     href="/admin/products"
@@ -33,10 +71,31 @@ export default function AdminSidebar() {
                 </Link>
                 <Link
                     href="/admin/questions"
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${isActive('/admin/questions') ? 'bg-pink-50 text-pink-700' : 'text-gray-700 hover:bg-pink-50 hover:text-pink-700'}`}
+                    className={`flex items-center justify-between px-4 py-3 rounded-lg font-medium transition-colors ${isActive('/admin/questions') ? 'bg-pink-50 text-pink-700' : 'text-gray-700 hover:bg-pink-50 hover:text-pink-700'}`}
                 >
-                    <MessageCircle size={20} />
-                    {t('productQuestions')}
+                    <div className="flex items-center gap-3">
+                        <MessageCircle size={20} />
+                        {t('productQuestions')}
+                    </div>
+                    {/* Add question specific badge logic if needed later, for now maybe just messages total */}
+                    {/* User requested 'unreadMessagesCount' for Orders tab or similar, but typically MessageCircle is for direct messages/questions. 
+                        Wait, the user said: "New Messages: The 'Orders' tab badge should also include (or show separately) the total count of unread messages from all customers."
+                        This implies messages are tied to orders. So the orders tab badge should show unread messages too? 
+                        Let's combine them on the Orders tab badge or show two badges. Since the space is small, let's sum them or show just one if prominent.
+                        Or maybe add a separate badge for messages on the Orders tab row.
+                        
+                        Re-reading: "New Messages: The 'Orders' tab badge should also include (or show separately) the total count of unread messages from all customers."
+                        Also "New Orders: Add a notification badge... on the 'Orders' tab showing the count of orders...".
+                        
+                        If I put both on the Orders tab, it might be confusing. 
+                        Let's try to show ordered Badges if space permits.
+                        Actually, let's sum them for the main badge, or prioritize messages if critical.
+                        Let's just show the new orders count on the Orders tab for now as primarily requested, 
+                        and maybe if there are unread messages, show a distinct dot or just add to the count?
+                        
+                        "The 'Orders' tab badge should also include... total count of unread messages".
+                        So Total Notification = New Orders + Unread Messages.
+                    */}
                 </Link>
 
                 <div className="pt-4 mt-4 border-t">

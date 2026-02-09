@@ -9,8 +9,14 @@ datasource db {
 
 model Product {
   id            String     @id @default(uuid())
-  name          String
-  description   String?
+  name          String?    // Deprecated in favor of localized names, kept for backward compatibility
+  name_tr       String?
+  name_en       String?
+  name_ar       String?
+  description   String?    // Deprecated in favor of localized descriptions, kept for backward compatibility
+  description_tr String?
+  description_en String?
+  description_ar String?
   images        String[]   // Array of 4 images
   originalPrice Decimal
   discountPrice Decimal?
@@ -172,9 +178,10 @@ model ProductQuestion {
   user      User     @relation(fields: [userId], references: [id])
   question  String
   answer    String?
-  isReadByAdmin Boolean @default(false)
-  isAnswerRead Boolean @default(false)
-  createdAt DateTime @default(now())
+  isRead        Boolean  @default(false)
+  isReadByAdmin Boolean  @default(false)
+  isAnswerRead  Boolean  @default(false)
+  createdAt     DateTime @default(now())
   answeredAt DateTime?
 }
 
