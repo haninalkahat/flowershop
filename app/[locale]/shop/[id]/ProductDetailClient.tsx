@@ -15,21 +15,26 @@ import ProductReviews from '@/components/ProductReviews';
 
 export default function ProductDetailClient({ product, initialColor }: { product: any, initialColor?: string }) {
     const t = useTranslations('Product');
+    const tCommon = useTranslations('Common');
+    const tTypes = useTranslations('FlowerTypes');
     const locale = useLocale();
 
     // Localized Name/Description Helpers
     const getName = () => {
-        if (locale === 'tr' && product.name_tr) return product.name_tr;
-        if (locale === 'ar' && product.name_ar) return product.name_ar;
-        if (locale === 'en' && product.name_en) return product.name_en;
-        return product.name;
+        if (locale === 'tr') return product.name_tr || product.name_en || product.name;
+        if (locale === 'ar') return product.name_ar || product.name_en || product.name;
+        return product.name_en || product.name;
+    };
+
+    const calculateDiscountPercentage = (original: number, discount: number) => {
+        if (!original || !discount) return 0;
+        return Math.round(((original - discount) / original) * 100);
     };
 
     const getDescription = () => {
-        if (locale === 'tr' && product.description_tr) return product.description_tr;
-        if (locale === 'ar' && product.description_ar) return product.description_ar;
-        if (locale === 'en' && product.description_en) return product.description_en;
-        return product.description;
+        if (locale === 'tr') return product.description_tr || product.description_en || product.description;
+        if (locale === 'ar') return product.description_ar || product.description_en || product.description;
+        return product.description_en || product.description;
     };
 
     const displayName = getName();
@@ -125,9 +130,12 @@ export default function ProductDetailClient({ product, initialColor }: { product
 
     // Calculate current price based on selected variant
     const selectedVariant = hasVariants ? product.variants.find((v: any) => v.colorName === selectedColor) : null;
+    const effectiveDiscountPrice = product.discountPrice ? Number(product.discountPrice) : null;
     const currentPrice = selectedVariant && selectedVariant.price
         ? Number(selectedVariant.price)
-        : (product.discountPrice ? Number(product.discountPrice) : Number(product.originalPrice));
+        : (effectiveDiscountPrice !== null ? effectiveDiscountPrice : Number(product.originalPrice));
+
+    const showDiscount = !selectedVariant && product.discountPrice;
 
     // Effect to update image when variant changes (already handled by handleColorSelect but let's reinforce or simplify)
     // Actually handleColorSelect handles it, but let's ensure it doesn't get messed up.
@@ -171,9 +179,9 @@ export default function ProductDetailClient({ product, initialColor }: { product
                 selectedColor: selectedColor !== 'Original' ? selectedColor : undefined
             }, quantity);
 
-            toast.success(`${displayName} added to cart! 🌸`);
+            toast.success(tCommon('productAddedToCart', { name: displayName }));
         } catch (error) {
-            toast.error('Could not add to cart. Please try again.');
+            toast.error(tCommon('failedAddToCart'));
         } finally {
             setLoading(false);
         }
@@ -240,23 +248,26 @@ export default function ProductDetailClient({ product, initialColor }: { product
                     {/* Right: Details */}
                     <div className="flex flex-col justify-center">
                         <span className="text-pink-600 font-bold tracking-widest uppercase text-sm mb-2">
-                            {product.flowerType}
+                            {/* @ts-ignore */}
+                            {tTypes(product.flowerType.toLowerCase())}
                         </span>
                         <h1 className="text-4xl md:text-5xl font-bold font-serif text-gray-900 mb-4 leading-tight">
                             {displayName}
                         </h1>
-
+                        {/* Price & Rating */}
                         <div className="flex items-center gap-4 mb-6">
                             <span className="text-3xl font-medium text-gray-900">
                                 {formatPrice(currentPrice)}
                             </span>
-                            {/* Only show "sale" price if we are NOT on a variant specific upgrade that might hide the discount logic, 
-                               or if the base product had a discount. Complex logic... 
-                               For now, simplified: show current price as the price. */}
-                            {!selectedVariant && product.discountPrice && (
-                                <span className="text-xl text-gray-300 line-through">
-                                    {formatPrice(Number(product.originalPrice))}
-                                </span>
+                            {showDiscount && (
+                                <>
+                                    <span className="text-xl text-gray-300 line-through">
+                                        {formatPrice(Number(product.originalPrice))}
+                                    </span>
+                                    <span className="bg-red-100 text-red-600 px-2 py-1 rounded-md text-sm font-bold">
+                                        -{calculateDiscountPercentage(Number(product.originalPrice), Number(product.discountPrice))}%
+                                    </span>
+                                </>
                             )}
                             <div className="flex items-center gap-1 ml-auto">
                                 <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
@@ -356,7 +367,7 @@ export default function ProductDetailClient({ product, initialColor }: { product
                                 ) : (
                                     <>
                                         <ShoppingCart className="w-3.5 h-3.5 md:w-5 md:h-5" />
-                                        <span>{t('addToCart')} - {formatPrice(currentPrice * quantity)}</span>
+                                        <span>{tCommon('addToCart')} - {formatPrice(currentPrice * quantity)}</span>
                                     </>
                                 )}
                             </button>

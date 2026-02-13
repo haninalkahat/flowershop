@@ -38,11 +38,12 @@ export default async function RootLayout({
 
   const messages = await getMessages();
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
-  const fonts = locale === 'ar' ? `${cairo.className} ${cairo.variable}` : `${inter.variable} ${playfair.variable} font-sans`;
+  // Include all font variables to prevent "preloaded but not used" warning, but apply specific font class based on locale
+  const fonts = `${cairo.variable} ${inter.variable} ${playfair.variable} ${locale === 'ar' ? cairo.className : 'font-sans'}`;
 
   return (
     <html lang={locale} dir={dir}>
-      <body className={`${fonts} antialiased text-gray-800`} suppressHydrationWarning>
+      <body className={`${fonts} antialiased text-gray-800 bg-gray-50 transition-colors duration-300`}>
         <NextIntlClientProvider messages={messages}>
           <AuthProvider>
             <CartProvider>

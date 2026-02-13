@@ -1,17 +1,32 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from '@/i18n/navigation';
+import { useSearchParams } from 'next/navigation';
 import { User, Lock, ShoppingBag, Truck, MessageCircle, Send, X, Package, HelpCircle, ChevronDown } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
-export default function ProfilePage() {
+
+function ProfileContent() {
     const t = useTranslations('Profile');
+    const tAdmin = useTranslations('Admin');
+    const locale = useLocale();
+
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => setMounted(true), []);
     const { user, checkAuth, loading: authLoading } = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'orders' | 'questions'>('profile');
+
+    useEffect(() => {
+        const tab = searchParams.get('tab');
+        if (tab && ['profile', 'security', 'orders', 'questions'].includes(tab)) {
+            setActiveTab(tab as any);
+        }
+    }, [searchParams]);
 
     // Profile State
     const [profileData, setProfileData] = useState({
@@ -287,15 +302,33 @@ export default function ProfilePage() {
 
 
 
-    if (authLoading || !user) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    const getProductName = (product: any) => {
+        if (!product) return 'Unknown Product';
+        if (locale === 'tr') return product.name_tr || product.name_en || product.name;
+        if (locale === 'ar') return product.name_ar || product.name_en || product.name;
+        return product.name_en || product.name;
+    };
+
+    const getStatusLabel = (status: string) => {
+        const key = status === 'AWAITING_PAYMENT' ? 'awaitingPayment' :
+            status === 'PAID' ? 'paid' :
+                status === 'REJECTED' ? 'rejected' :
+                    status === 'CANCELED' ? 'canceled' :
+                        status === 'PREPARING' ? 'preparing' :
+                            status === 'DELIVERED' ? 'delivered' : status.toLowerCase();
+        // @ts-ignore
+        return tAdmin(`status.${key}`);
+    };
+
+    if (authLoading || !user) return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-900">Loading...</div>;
 
     return (
-        <main className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-[1600px] mx-auto">
+        <main className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+            <div className="max-w-screen-xl mx-auto">
                 <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
                     {/* Sidebar Tabs */}
                     <div className="w-full lg:w-72 flex-shrink-0">
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 transition-colors duration-300">
                             <div className="flex flex-col gap-2">
                                 <button
                                     onClick={() => setActiveTab('profile')}
@@ -339,7 +372,7 @@ export default function ProfilePage() {
                     {/* Main Content */}
                     <div className="flex-1">
                         {activeTab === 'profile' && (
-                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 transition-colors duration-300">
                                 <h1 className="text-2xl font-bold font-serif text-gray-900 mb-6">{t('profileDetails')}</h1>
                                 <form onSubmit={handleProfileUpdate} className="space-y-6 max-w-lg">
                                     <div>
@@ -348,7 +381,7 @@ export default function ProfilePage() {
                                             type="text"
                                             value={profileData.fullName}
                                             onChange={(e) => setProfileData({ ...profileData, fullName: e.target.value })}
-                                            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-pink-500 focus:border-pink-500 bg-gray-50"
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-pink-500 focus:border-pink-500 bg-gray-50 text-gray-900 transition-colors duration-300"
                                         />
                                     </div>
                                     <div>
@@ -357,7 +390,7 @@ export default function ProfilePage() {
                                             type="email"
                                             value={profileData.email}
                                             onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-                                            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-pink-500 focus:border-pink-500 bg-gray-50"
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-pink-500 focus:border-pink-500 bg-gray-50 text-gray-900 transition-colors duration-300"
                                         />
                                     </div>
                                     <div>
@@ -366,7 +399,7 @@ export default function ProfilePage() {
                                             type="tel"
                                             value={profileData.phoneNumber}
                                             onChange={(e) => setProfileData({ ...profileData, phoneNumber: e.target.value })}
-                                            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-pink-500 focus:border-pink-500 bg-gray-50"
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-pink-500 focus:border-pink-500 bg-gray-50 text-gray-900 transition-colors duration-300"
                                             placeholder="+1 (555) 000-0000"
                                         />
                                     </div>
@@ -376,7 +409,7 @@ export default function ProfilePage() {
                                             type="text"
                                             value={profileData.address}
                                             onChange={(e) => setProfileData({ ...profileData, address: e.target.value })}
-                                            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-pink-500 focus:border-pink-500 bg-gray-50"
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-pink-500 focus:border-pink-500 bg-gray-50 text-gray-900 transition-colors duration-300"
                                             placeholder={t('address')}
                                         />
                                     </div>
@@ -386,7 +419,7 @@ export default function ProfilePage() {
                                             type="text"
                                             value={profileData.city}
                                             onChange={(e) => setProfileData({ ...profileData, city: e.target.value })}
-                                            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-pink-500 focus:border-pink-500 bg-gray-50"
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-pink-500 focus:border-pink-500 bg-gray-50 text-gray-900 transition-colors duration-300"
                                             placeholder={t('city')}
                                         />
                                     </div>
@@ -400,6 +433,7 @@ export default function ProfilePage() {
                                         {t('saveChanges')}
                                     </button>
                                 </form>
+
                             </div>
                         )}
 
@@ -534,7 +568,7 @@ export default function ProfilePage() {
                                                                 <img src={q.product.images[0]} alt={q.product.name} className="w-16 h-16 rounded-lg object-cover" />
                                                                 <div className="flex-1">
                                                                     <Link href={`/shop/${q.product.id}`} className="font-bold text-gray-900 hover:text-pink-600 text-sm">
-                                                                        {q.product.name}
+                                                                        {getProductName(q.product)}
                                                                     </Link>
                                                                     <p className="mt-2 text-gray-700 font-medium text-sm">Q: {q.question}</p>
                                                                     {q.answer ? (
@@ -600,7 +634,7 @@ export default function ProfilePage() {
                                                                             order.status === 'CANCELED' ? 'bg-red-100 text-red-700' :
                                                                                 'bg-yellow-100 text-yellow-700'
                                                                     }`}>
-                                                                    {order.status.replace('_', ' ')}
+                                                                    {getStatusLabel(order.status)}
                                                                 </span>
                                                                 <button
                                                                     onClick={() => setTrackingOrder(order)}
@@ -625,16 +659,32 @@ export default function ProfilePage() {
                                                         <div className="border-t border-gray-100 bg-gray-50 p-6 animate-fade-in">
                                                             <div className="space-y-4">
                                                                 {order.items.map((item: any) => (
-                                                                    <div key={item.id} className="flex justify-between items-center bg-white p-3 rounded-lg border border-gray-100">
-                                                                        <div className="flex items-center gap-4">
-                                                                            <img src={item.product?.images?.[0] || item.product?.imageUrl} alt={item.product.name} className="w-12 h-12 rounded object-cover" />
-                                                                            <div>
-                                                                                <p className="font-bold text-gray-900 text-sm">{item.product.name}</p>
-                                                                                <p className="text-xs text-gray-500">{t('qty')}: {item.quantity} {item.selectedColor && `• ${t('color')}: ${item.selectedColor}`}</p>
+                                                                    <Link
+                                                                        key={item.id}
+                                                                        href={`/shop/${item.product.id}`}
+                                                                        className="block group"
+                                                                    >
+                                                                        <div className="flex justify-between items-center bg-white p-3 rounded-lg border border-gray-100 hover:bg-gray-50 hover:border-gray-200 transition-all duration-200">
+                                                                            <div className="flex items-center gap-4">
+                                                                                <img
+                                                                                    src={item.product?.images?.[0] || item.product?.imageUrl}
+                                                                                    alt={item.product.name}
+                                                                                    className="w-12 h-12 rounded object-cover group-hover:scale-105 transition-transform"
+                                                                                />
+                                                                                <div>
+                                                                                    <p className="font-bold text-gray-900 text-sm group-hover:text-pink-600 transition-colors">
+                                                                                        {getProductName(item.product)}
+                                                                                    </p>
+                                                                                    <p className="text-xs text-gray-500">
+                                                                                        {t('qty')}: {item.quantity} {item.selectedColor && `• ${t('color')}: ${item.selectedColor}`}
+                                                                                    </p>
+                                                                                </div>
                                                                             </div>
+                                                                            <p className="font-medium text-gray-900 text-sm group-hover:text-pink-600 transition-colors">
+                                                                                ${Number(item.price).toFixed(2)}
+                                                                            </p>
                                                                         </div>
-                                                                        <p className="font-medium text-gray-900 text-sm">${Number(item.price).toFixed(2)}</p>
-                                                                    </div>
+                                                                    </Link>
                                                                 ))}
                                                                 <div className="flex justify-between items-center pt-2 border-t border-gray-200 mt-4">
                                                                     <span className="font-bold text-gray-700">{t('totalOrderAmount')}</span>
@@ -678,7 +728,7 @@ export default function ProfilePage() {
                                                     {idx + 1}
                                                 </div>
                                                 <span className={`text-xs font-bold text-center ${isCompleted ? 'text-pink-600' : 'text-gray-400'}`}>
-                                                    {step.replace('_', ' ')}
+                                                    {getStatusLabel(step)}
                                                 </span>
                                             </div>
                                         );
@@ -695,7 +745,7 @@ export default function ProfilePage() {
                                 </div>
                                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
                                     <p className="font-bold text-gray-900 mb-1">{t('currentStatus')}:</p>
-                                    <p className="text-pink-600 text-lg font-medium">{trackingOrder.status.replace('_', ' ')}</p>
+                                    <p className="text-pink-600 text-lg font-medium">{getStatusLabel(trackingOrder.status)}</p>
                                     <p className="text-sm text-gray-500 mt-2">
                                         {trackingOrder.status === 'PREPARING' ? t('preparingDesc') :
                                             trackingOrder.status === 'DELIVERED' ? t('deliveredDesc') :
@@ -765,5 +815,13 @@ export default function ProfilePage() {
                 )}
             </div>
         </main>
+    );
+}
+
+export default function ProfilePage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+            <ProfileContent />
+        </Suspense>
     );
 }

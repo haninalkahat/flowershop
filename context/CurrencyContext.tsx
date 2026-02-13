@@ -31,17 +31,17 @@ const CurrencyProviderContent = ({ children }: { children: ReactNode }) => {
     const [rates, setRates] = useState<Record<string, number>>(FALLBACK_RATES);
     const [loading, setLoading] = useState(true);
 
-    // Initialize currency from cookie or detection
+    // Initialize currency from cookie on mount ONLY
     useEffect(() => {
         const initCurrency = async () => {
             // 1. Check Cookie
-            if (cookies.currency) {
+            if (cookies.currency && ['USD', 'TRY', 'SAR'].includes(cookies.currency)) {
                 setCurrencyState(cookies.currency as Currency);
                 setLoading(false);
                 return;
             }
 
-            // 2. Detect via IP
+            // 2. Detect via IP if no cookie
             try {
                 const res = await fetch('https://ipapi.co/json/');
                 const data = await res.json();
@@ -63,8 +63,9 @@ const CurrencyProviderContent = ({ children }: { children: ReactNode }) => {
             }
         };
 
+        // Only run once on mount
         initCurrency();
-    }, [cookies.currency, setCookie]);
+    }, []); // Empty dependency array to prevent loops or re-runs
 
     // Fetch Exchange Rates
     useEffect(() => {
@@ -78,7 +79,7 @@ const CurrencyProviderContent = ({ children }: { children: ReactNode }) => {
                     console.warn('Failed to fetch rates, using fallback');
                 }
             } catch (error) {
-                console.error('Error fetching rates:', error);
+                console.warn('Error fetching rates:', error);
             }
         };
 
@@ -89,7 +90,9 @@ const CurrencyProviderContent = ({ children }: { children: ReactNode }) => {
     }, []);
 
     const setCurrency = (newCurrency: Currency) => {
+        // Update state immediately for UI responsiveness
         setCurrencyState(newCurrency);
+        // Persist to cookie
         setCookie('currency', newCurrency, { path: '/', maxAge: 31536000 });
     };
 
@@ -136,3 +139,4 @@ export const useCurrency = () => {
     }
     return context;
 };
+

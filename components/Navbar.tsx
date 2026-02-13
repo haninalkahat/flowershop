@@ -76,14 +76,14 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-pink-100">
-      <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+    <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-pink-100 transition-colors duration-300">
+      <div className="container mx-auto px-4 md:px-6 py-4 flex justify-between items-center">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="bg-pink-50 p-2 rounded-full group-hover:bg-pink-100 transition-colors duration-300">
-            <Flower className="w-6 h-6 text-pink-600" />
+          <div className="bg-pink-50 p-1.5 md:p-2 rounded-full group-hover:bg-pink-100 transition-colors duration-300">
+            <Flower className="w-4 h-4 md:w-6 md:h-6 text-pink-600" />
           </div>
-          <span className="font-serif text-2xl font-bold text-gray-900 tracking-wide">Flowershop</span>
+          <span className="font-serif text-lg md:text-2xl font-bold text-gray-900 tracking-wide">Flowershop</span>
         </Link>
 
         {/* Desktop Menu */}
@@ -236,7 +236,7 @@ export default function Navbar() {
           <div className="relative" ref={mobileCurrencyDropdownRef}>
             <button
               onClick={() => setShowMobileCurrencyDropdown(!showMobileCurrencyDropdown)}
-              className="flex items-center gap-1 text-gray-500 hover:text-pink-600 transition-colors p-1 rounded-full hover:bg-gray-100 font-medium text-xs"
+              className="flex items-center gap-1 text-gray-500 hover:text-pink-600 transition-colors p-1 rounded-full hover:bg-gray-100 font-medium text-[10px]"
             >
               {currency}
             </button>
@@ -263,7 +263,7 @@ export default function Navbar() {
               onClick={() => setShowMobileLangDropdown(!showMobileLangDropdown)}
               className="flex items-center gap-1 text-gray-500 hover:text-pink-600 transition-colors p-1 rounded-full hover:bg-gray-100"
             >
-              <Globe className="w-5 h-5" />
+              <Globe className="w-4 h-4" />
             </button>
 
             {showMobileLangDropdown && (

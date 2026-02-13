@@ -80,6 +80,8 @@
         "priceLowHigh": "Fiyat: Düşükten Yükseğe",
         "priceHighLow": "Fiyat: Yüksekten Düşüğe",
         "noProducts": "Ürün bulunamadı.",
+        "searchPlaceholder": "Çiçek ara...",
+        "noSearchMatch": "Aramanızla eşleşen ürün bulunamadı.",
         "all": "Tümü",
         "resetAll": "Filtreleri Temizle"
     },
@@ -105,7 +107,11 @@
     },
     "Admin": {
         "title": "Yönetici Paneli",
+        "all": "Tümü",
         "orders": "Siparişler",
+        "newOrders": "Yeni Siparişler",
+        "unreadMessages": "Okunmamış Mesajlar",
+        "unreadQuestions": "Okunmamış Sorular",
         "products": "Ürünler",
         "productQuestions": "Sorular",
         "backToShop": "Mağazaya Dön",
@@ -120,7 +126,10 @@
             "messages": "Mesajlar",
             "actions": "İşlemler"
         },
+        "searchPlaceholder": "ID, Kullanıcı veya Ürün ara...",
+        "noOrders": "Kriterlerinize uygun sipariş bulunamadı.",
         "status": {
+            "all": "Tümü",
             "awaitingPayment": "Ödeme Bekliyor",
             "markAsPaid": "Ödendi Olarak İşaretle",
             "preparing": "Hazırlanıyor",
@@ -193,7 +202,12 @@
             "success": "Ürün başarıyla oluşturuldu",
             "error": "Ürün oluşturulamadı",
             "imageRequired": "En az bir görsel gerekli",
-            "genericError": "Bir şeyler ters gitti"
+            "genericError": "Bir şeyler ters gitti",
+            "loading": "Yükleniyor...",
+            "backToShop": "Mağazaya Dön",
+            "delete": "Ürünü Sil",
+            "all": "Tümü",
+            "editProduct": "Ürünü Düzenle"
         }
     },
     "FlowerTypes": {
@@ -254,7 +268,11 @@
         "newReply": "Yeni Yanıt!",
         "order": "Sipariş",
         "adminResponse": "Yönetici Yanıtı",
-        "waitingResponse": "Yanıt bekleniyor..."
+        "waitingResponse": "Yanıt bekleniyor...",
+        "addToCart": "Sepete Ekle",
+        "addedToCart": "Sepete eklendi!",
+        "failedAddToCart": "Sepete eklenemedi.",
+        "productAddedToCart": "{name} sepete eklendi! 🌸"
     },
     "Contact": {
         "getInTouch": "İletişime Geçin",
@@ -322,6 +340,17 @@
         "errorMissingFile": "Lütfen ödeme dekontunu yükleyin.",
         "errorMissingMtcn": "Lütfen MTCN makbuzunu yükleyin.",
         "copied": "Panoya kopyalandı!"
+    },
+    "Success": {
+        "title": "Siparişiniz için teşekkür ederiz!",
+        "subtitle": "Siparişinizi aldık ve ödeme onayını bekliyoruz.",
+        "orderId": "Sipariş Numarası",
+        "items": "Satın Alınan Ürünler",
+        "total": "Tutar",
+        "status": "Sipariş Durumu",
+        "viewAllOrders": "Tüm Siparişleri Görüntüle",
+        "backToShop": "Mağazaya Dön",
+        "awaitingPayment": "Ödeme Bekliyor"
     },
     "Footer": {
         "rightsReserved": "Tüm hakları saklıdır.",

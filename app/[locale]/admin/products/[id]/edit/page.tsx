@@ -6,23 +6,33 @@ import { Upload, X, Plus, Save, ArrowLeft, Trash } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
 import { use } from 'react';
+import { useTranslations } from 'next-intl';
 
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
+    const t = useTranslations('Admin.form');
+    const tTypes = useTranslations('FlowerTypes');
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
     // Product State
     const [formData, setFormData] = useState({
-        name: '',
-        description: '',
+        name_tr: '',
+        name_en: '',
+        name_ar: '',
+        description_tr: '',
+        description_en: '',
+        description_ar: '',
+        name: '', // Derived/Legacy
+        description: '', // Derived/Legacy
         originalPrice: '',
+        discountPrice: '',
         flowerType: 'Rose',
         origin: 'Holland',
         freshness: 'Guaranteed 7 Days',
         height: '50cm',
-        images: [] as string[], // Changed from imageUrl
+        images: [] as string[],
         isFeatured: false
     });
 
@@ -41,9 +51,16 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             if (res.ok) {
                 const product = await res.json();
                 setFormData({
+                    name_tr: product.name_tr || '',
+                    name_en: product.name_en || product.name || '',
+                    name_ar: product.name_ar || '',
+                    description_tr: product.description_tr || '',
+                    description_en: product.description_en || product.description || '',
+                    description_ar: product.description_ar || '',
                     name: product.name,
                     description: product.description || '',
-                    originalPrice: String(product.originalPrice),
+                    originalPrice: product.originalPrice.toString(),
+                    discountPrice: product.discountPrice ? product.discountPrice.toString() : '',
                     flowerType: product.flowerType || 'Rose',
                     origin: product.origin || '',
                     freshness: product.freshness || '',
@@ -110,9 +127,17 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
         setSaving(true);
         const data = new FormData();
-        data.append('name', formData.name);
-        data.append('description', formData.description);
+        data.append('name_tr', formData.name_tr);
+        data.append('name_en', formData.name_en);
+        data.append('name_ar', formData.name_ar);
+        data.append('description_tr', formData.description_tr);
+        data.append('description_en', formData.description_en);
+        data.append('description_ar', formData.description_ar);
+        // Fallback for legacy fields
+        data.append('name', formData.name_en || formData.name_tr || formData.name_ar);
+        data.append('description', formData.description_en || formData.description_tr || formData.description_ar);
         data.append('originalPrice', formData.originalPrice);
+        data.append('discountPrice', formData.discountPrice);
         data.append('flowerType', formData.flowerType);
         data.append('origin', formData.origin);
         data.append('freshness', formData.freshness);
@@ -165,67 +190,100 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         }
     };
 
-    if (loading) return <div className="p-10 text-center">Loading product...</div>;
+
+    const flowerTypes = [
+        "Rose", "Tulip", "Lily", "Orchid", "Mixed", "Hydrangea", "Carnation", "Pampas", "Peony", "Calla Lily", "Daffodil"
+    ];
+
+    if (loading) return <div className="p-10 text-center">{t('loading')}</div>;
 
     return (
         <div className="max-w-4xl mx-auto pb-20 pt-10 px-6">
             <div className="flex items-center justify-between mb-8">
                 <button onClick={() => router.back()} className="text-gray-500 hover:text-gray-900 flex items-center gap-2 transition-colors">
-                    <ArrowLeft size={20} /> Back to Products
+                    <ArrowLeft size={20} /> {t('backToShop')}
                 </button>
                 <div className="flex gap-4">
                     <button
                         onClick={handleDeleteProduct}
                         className="text-red-500 hover:text-red-700 px-4 py-2 border border-red-200 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2"
                     >
-                        <Trash size={18} /> Delete
+                        <Trash size={18} /> {t('delete')}
                     </button>
                 </div>
             </div>
 
-            <h1 className="text-3xl font-serif font-bold text-gray-800 mb-8">Edit Product: {formData.name}</h1>
+            <h1 className="text-3xl font-serif font-bold text-gray-800 mb-8">{t('editProduct')}: {formData.name_en || formData.name}</h1>
 
             <form onSubmit={handleSubmit} className="space-y-8">
                 {/* Basic Info */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
-                    <h2 className="text-xl font-semibold text-gray-700 border-b pb-2">Basic Information</h2>
+                    <h2 className="text-xl font-semibold text-gray-700 border-b pb-2 text-left rtl:text-right">{t('basicInfo')}</h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
-                            <input
-                                required
-                                type="text"
-                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all"
-                                value={formData.name}
-                                onChange={e => setFormData({ ...formData, name: e.target.value })}
-                            />
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1 text-left rtl:text-right">{t('productName')} (TR / EN / AR)</label>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <input
+                                    type="text"
+                                    placeholder="Turkish Name"
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all text-left"
+                                    value={formData.name_tr}
+                                    onChange={e => setFormData({ ...formData, name_tr: e.target.value })}
+                                />
+                                <input
+                                    required
+                                    type="text"
+                                    placeholder="English Name"
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all text-left"
+                                    value={formData.name_en}
+                                    onChange={e => setFormData({ ...formData, name_en: e.target.value })}
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Arabic Name"
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all text-right"
+                                    value={formData.name_ar}
+                                    onChange={e => setFormData({ ...formData, name_ar: e.target.value })}
+                                />
+                            </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1 text-left rtl:text-right">{t('price')}</label>
                             <input
                                 required
                                 type="number" step="0.01"
-                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all"
+                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all text-left rtl:text-right"
                                 value={formData.originalPrice}
                                 onChange={e => setFormData({ ...formData, originalPrice: e.target.value })}
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Flower Type</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1 text-left rtl:text-right">Discount Price (Optional)</label>
+                            <input
+                                type="number" step="0.01"
+                                placeholder="Leave empty if no discount"
+                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all text-left rtl:text-right"
+                                value={formData.discountPrice ?? ''}
+                                onChange={e => setFormData({ ...formData, discountPrice: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1 text-left rtl:text-right">{t('flowerType')}</label>
                             <select
-                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all bg-white"
+                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all bg-white text-left rtl:text-right"
                                 value={formData.flowerType}
                                 onChange={e => setFormData({ ...formData, flowerType: e.target.value })}
                             >
-                                <option value="Rose">Rose</option>
-                                <option value="Tulip">Tulip</option>
-                                <option value="Lily">Lily</option>
-                                <option value="Orchid">Orchid</option>
-                                <option value="Mixed">Mixed Bouquet</option>
+                                {flowerTypes.map(type => (
+                                    <option key={type} value={type}>
+                                        {/* @ts-ignore */}
+                                        {tTypes(type.toLowerCase())}
+                                    </option>
+                                ))}
                             </select>
                         </div>
-                        <div className="flex items-center space-x-3 pt-6">
+                        <div className="flex items-center space-x-3 pt-6 rtl:space-x-reverse">
                             <input
                                 type="checkbox"
                                 id="isFeatured"
@@ -233,19 +291,36 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                 checked={formData.isFeatured}
                                 onChange={e => setFormData({ ...formData, isFeatured: e.target.checked })}
                             />
-                            <label htmlFor="isFeatured" className="text-gray-700 font-medium cursor-pointer">Featured Product</label>
+                            <label htmlFor="isFeatured" className="text-gray-700 font-medium cursor-pointer selects-none">{t('featuredProduct')}</label>
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                        <textarea
-                            required
-                            rows={4}
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all"
-                            value={formData.description}
-                            onChange={e => setFormData({ ...formData, description: e.target.value })}
-                        />
+                        <label className="block text-sm font-medium text-gray-700 mb-1 text-left rtl:text-right">{t('description')} (TR / EN / AR)</label>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <textarea
+                                rows={4}
+                                placeholder="Turkish Description"
+                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all text-left"
+                                value={formData.description_tr}
+                                onChange={e => setFormData({ ...formData, description_tr: e.target.value })}
+                            />
+                            <textarea
+                                required
+                                rows={4}
+                                placeholder="English Description"
+                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all text-left"
+                                value={formData.description_en}
+                                onChange={e => setFormData({ ...formData, description_en: e.target.value })}
+                            />
+                            <textarea
+                                rows={4}
+                                placeholder="Arabic Description"
+                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all text-right"
+                                value={formData.description_ar}
+                                onChange={e => setFormData({ ...formData, description_ar: e.target.value })}
+                            />
+                        </div>
                     </div>
                 </div>
 

@@ -34,6 +34,8 @@ export async function POST(req: Request) {
         const description_ar = formData.get('description_ar') as string;
 
         const originalPrice = parseFloat(formData.get('originalPrice') as string);
+        const discountPriceStr = formData.get('discountPrice');
+        const discountPrice = discountPriceStr ? parseFloat(discountPriceStr as string) : null;
         const flowerType = formData.get('flowerType') as string;
         const origin = formData.get('origin') as string;
         const freshness = formData.get('freshness') as string;
@@ -71,6 +73,7 @@ export async function POST(req: Request) {
                 description_en,
                 description_ar,
                 originalPrice,
+                discountPrice,
                 flowerType,
                 origin,
                 freshness,

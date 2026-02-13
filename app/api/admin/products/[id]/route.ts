@@ -35,7 +35,16 @@ export async function PUT(
 
         const name = formData.get('name') as string;
         const description = formData.get('description') as string;
+
+        const name_tr = formData.get('name_tr') as string;
+        const name_en = formData.get('name_en') as string;
+        const name_ar = formData.get('name_ar') as string;
+        const description_tr = formData.get('description_tr') as string;
+        const description_en = formData.get('description_en') as string;
+        const description_ar = formData.get('description_ar') as string;
         const originalPrice = parseFloat(formData.get('originalPrice') as string);
+        const discountPriceStr = formData.get('discountPrice');
+        const discountPrice = discountPriceStr && discountPriceStr !== 'null' ? parseFloat(discountPriceStr as string) : null;
         const flowerType = formData.get('flowerType') as string;
         const origin = formData.get('origin') as string;
         const freshness = formData.get('freshness') as string;
@@ -72,7 +81,14 @@ export async function PUT(
             data: {
                 name,
                 description,
+                name_tr,
+                name_en,
+                name_ar,
+                description_tr,
+                description_en,
+                description_ar,
                 originalPrice,
+                discountPrice,
                 flowerType,
                 origin,
                 freshness,

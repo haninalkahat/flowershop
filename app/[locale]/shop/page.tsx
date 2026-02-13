@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect, useMemo, Suspense } from 'react';
-import { SlidersHorizontal, Flower } from 'lucide-react';
+import { SlidersHorizontal, Flower, Search, X } from 'lucide-react';
 import FilterSidebar from '@/components/FilterSidebar';
 import ProductCard from '@/components/ProductCard';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Product } from '@/context/CartContext';
-import { Link } from '@/i18n/navigation'; // Use localized Link
-import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 
 // Force dynamic rendering to prevent caching issues
 export const dynamic = 'force-dynamic';
@@ -17,6 +17,7 @@ function ShopContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const t = useTranslations('Shop');
+    const locale = useLocale();
     const tNav = useTranslations('Navigation');
     const tCommon = useTranslations('Common');
 
@@ -33,6 +34,16 @@ function ShopContent() {
     });
 
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [debouncedQuery, setDebouncedQuery] = useState('');
+
+    // Debounce search query
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedQuery(searchQuery);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
 
     // Fetch real products from DB
     useEffect(() => {
@@ -45,6 +56,8 @@ function ShopContent() {
                         // Ensure prices are numbers
                         const formattedData = data.map((item: any) => ({
                             ...item,
+                            name: item.name || '',
+                            description: item.description || null,
                             originalPrice: Number(item.originalPrice),
                             discountPrice: item.discountPrice ? Number(item.discountPrice) : null,
                         }));
@@ -89,6 +102,28 @@ function ShopContent() {
     // Filter products
     const filteredProducts = useMemo(() => {
         return products.filter((p) => {
+            // Filter by Search Query (Locale Aware)
+            if (debouncedQuery) {
+                const query = debouncedQuery.toLowerCase();
+                let nameToSearch = '';
+                let descToSearch = '';
+
+                if (locale === 'ar') {
+                    nameToSearch = p.name_ar || p.name || '';
+                    descToSearch = p.description_ar || p.description || '';
+                } else if (locale === 'tr') {
+                    nameToSearch = p.name_tr || p.name || '';
+                    descToSearch = p.description_tr || p.description || '';
+                } else {
+                    nameToSearch = p.name_en || p.name || '';
+                    descToSearch = p.description_en || p.description || '';
+                }
+
+                if (!nameToSearch.toLowerCase().includes(query) && !descToSearch.toLowerCase().includes(query)) {
+                    return false;
+                }
+            }
+
             // Filter by Type
             if (filters.flowerTypes.length > 0 && !filters.flowerTypes.includes(p.flowerType)) {
                 return false;
@@ -102,7 +137,7 @@ function ShopContent() {
 
             return true;
         });
-    }, [products, filters]);
+    }, [products, filters, debouncedQuery, locale]);
 
     return (
         <main className="min-h-screen bg-gray-50 pt-12 pb-24">
@@ -142,7 +177,31 @@ function ShopContent() {
                     </button>
                 </div>
 
-                <div className="flex gap-12">
+                {/* Search Bar Area */}
+                <div className="flex justify-center mb-8 relative z-10 -mt-16">
+                    <div className="relative w-full max-w-xl shadow-lg rounded-full">
+                        <input
+                            type="text"
+                            placeholder={t('searchPlaceholder')}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full py-4 pl-12 pr-12 rounded-full border border-gray-100 focus:border-pink-300 focus:ring-4 focus:ring-pink-50 outline-none text-gray-700 placeholder-gray-400 bg-white transition-all rtl:pr-12 rtl:pl-12"
+                        />
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-pink-400 rtl:left-auto rtl:right-4">
+                            <Search className="w-5 h-5" />
+                        </div>
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 rtl:right-auto rtl:left-4"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex gap-12 pt-8">
                     {/* Sidebar */}
                     <FilterSidebar
                         filters={filters}
@@ -180,9 +239,11 @@ function ShopContent() {
                         ) : (
                             <div className="flex flex-col items-center justify-center py-32 bg-white rounded-3xl shadow-sm border border-dashed border-gray-300">
                                 <div className="bg-pink-50 p-6 rounded-full mb-6">
-                                    <SlidersHorizontal className="w-12 h-12 text-pink-300" />
+                                    <Search className="w-12 h-12 text-pink-300" />
                                 </div>
-                                <h3 className="text-2xl font-bold font-serif text-gray-900 mb-2">{t('noProducts')}</h3>
+                                <h3 className="text-2xl font-bold font-serif text-gray-900 mb-2">
+                                    {debouncedQuery ? t('noSearchMatch') : t('noProducts')}
+                                </h3>
                                 <p className="text-gray-500 max-w-xs text-center">
                                     {tNav('home') === 'الرئيسية' ? 'لم نتمكن من العثور على أي زهور تطابق فلترتك الحالية.' : 'We couldn\'t find any flowers matching your current filters. Try adjusting your selection.'}
                                 </p>

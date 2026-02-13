@@ -21,6 +21,7 @@ export default function NewProductPage() {
         description_en: '',
         description_ar: '',
         originalPrice: '',
+        discountPrice: '',
         flowerType: 'Rose',
         origin: 'Holland',
         freshness: 'Guaranteed 7 Days',
@@ -70,6 +71,7 @@ export default function NewProductPage() {
         data.append('name', formData.name_en || formData.name_tr || formData.name_ar);
         data.append('description', formData.description_en || formData.description_tr || formData.description_ar);
         data.append('originalPrice', formData.originalPrice);
+        data.append('discountPrice', formData.discountPrice);
         data.append('flowerType', formData.flowerType);
         data.append('origin', formData.origin);
         data.append('freshness', formData.freshness);
@@ -167,6 +169,16 @@ export default function NewProductPage() {
                                 className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all text-left rtl:text-right"
                                 value={formData.originalPrice}
                                 onChange={e => setFormData({ ...formData, originalPrice: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1 text-left rtl:text-right">Discount Price (Optional)</label>
+                            <input
+                                type="number" step="0.01"
+                                placeholder="Leave empty if no discount"
+                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all text-left rtl:text-right"
+                                value={formData.discountPrice}
+                                onChange={e => setFormData({ ...formData, discountPrice: e.target.value })}
                             />
                         </div>
                         <div>

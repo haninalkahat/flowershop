@@ -38,7 +38,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     try {
         await prisma.order.update({
             where: { id },
-            data: { status }
+            data: {
+                status,
+                isNewOrder: false
+            }
         });
 
         return NextResponse.json({ success: true, status });

@@ -17,6 +17,7 @@ export default function AboutPage() {
                     className="object-cover"
                     priority
                     quality={100}
+                    sizes="100vw"
                 />
                 <div className="absolute inset-0 bg-black/40" /> {/* Dark overlay for better text legibility */}
                 <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
@@ -39,6 +40,7 @@ export default function AboutPage() {
                             alt="Florist arranging a bouquet"
                             fill
                             className="object-cover rounded-3xl shadow-xl"
+                            sizes="(max-width: 768px) 100vw, 50vw"
                         />
                     </div>
 

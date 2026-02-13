@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-const ADMIN_EMAIL = 'llaffashopstore@gmail.com';
+export const ADMIN_EMAIL = 'llaffashopstore@gmail.com';
 
 export async function isAdmin() {
     const cookieStore = await cookies();

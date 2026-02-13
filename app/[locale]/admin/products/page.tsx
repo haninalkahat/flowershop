@@ -4,11 +4,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from '@/i18n/navigation';
 import { Plus, Edit, Trash, Star } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 export default function AdminProductsPage() {
   const t = useTranslations('Admin');
   const tTypes = useTranslations('FlowerTypes');
+  const locale = useLocale();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,6 +29,13 @@ export default function AdminProductsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getProductName = (product: any) => {
+    if (!product) return 'Unknown Product';
+    if (locale === 'tr') return product.name_tr || product.name_en || product.name;
+    if (locale === 'ar') return product.name_ar || product.name_en || product.name;
+    return product.name_en || product.name;
   };
 
   if (loading) return <div>{t('loadingProducts')}</div>;
@@ -50,7 +58,7 @@ export default function AdminProductsPage() {
         {products.map((product) => (
           <div key={product.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center">
             <div>
-              <h3 className="font-bold text-gray-900">{product.name}</h3>
+              <h3 className="font-bold text-gray-900">{getProductName(product)}</h3>
               <p className="text-gray-500 text-sm mt-1">{/* @ts-ignore */}{product.flowerType ? tTypes(product.flowerType.toLowerCase()) : product.flowerType}</p>
               <div className="mt-2 font-medium text-pink-600">${Number(product.originalPrice).toFixed(2)}</div>
             </div>
@@ -74,7 +82,7 @@ export default function AdminProductsPage() {
           <tbody className="divide-y divide-gray-100">
             {products.map((product) => (
               <tr key={product.id} className="hover:bg-gray-50 transition-colors">
-                <td className="p-4 font-medium text-gray-900 text-left rtl:text-right">{product.name}</td>
+                <td className="p-4 font-medium text-gray-900 text-left rtl:text-right">{getProductName(product)}</td>
                 <td className="p-4 text-gray-600 text-left rtl:text-right">${Number(product.originalPrice).toFixed(2)}</td>
                 <td className="p-4 text-gray-500 text-left rtl:text-right">
                   {/* @ts-ignore */}

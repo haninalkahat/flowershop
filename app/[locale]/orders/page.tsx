@@ -3,6 +3,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link } from '@/i18n/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface Order {
     id: string;
@@ -14,6 +15,9 @@ interface Order {
 }
 
 export default function MyOrdersPage() {
+    const t = useTranslations('Admin.status');
+    const tCommon = useTranslations('Common');
+    const locale = useLocale();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -71,6 +75,24 @@ export default function MyOrdersPage() {
         }
     };
 
+    const getStatusLabel = (status: string) => {
+        const key = status === 'AWAITING_PAYMENT' ? 'awaitingPayment' :
+            status === 'PAID' ? 'paid' :
+                status === 'REJECTED' ? 'rejected' :
+                    status === 'CANCELED' ? 'canceled' :
+                        status === 'PREPARING' ? 'preparing' :
+                            status === 'DELIVERED' ? 'delivered' : status.toLowerCase();
+        // @ts-ignore
+        return t(key);
+    };
+
+    const getProductName = (product: any) => {
+        if (!product) return 'Unknown Product';
+        if (locale === 'tr') return product.name_tr || product.name_en || product.name;
+        if (locale === 'ar') return product.name_ar || product.name_en || product.name;
+        return product.name_en || product.name;
+    };
+
     return (
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-serif mb-8 text-center">My Orders</h1>
@@ -84,7 +106,7 @@ export default function MyOrdersPage() {
                                 <span className="text-xs text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</span>
                             </div>
                             <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                                {order.status.replace('_', ' ')}
+                                {getStatusLabel(order.status)}
                             </span>
                         </div>
 
@@ -102,7 +124,7 @@ export default function MyOrdersPage() {
                                                     {item.product.imageUrl && (
                                                         <img src={item.product.imageUrl} alt={item.product.name} className="w-8 h-8 rounded object-cover" />
                                                     )}
-                                                    <span>{item.product.name} {item.selectedColor && `(${item.selectedColor})`} x {item.quantity}</span>
+                                                    <span>{getProductName(item.product)} {item.selectedColor && `(${item.selectedColor})`} x {item.quantity}</span>
                                                 </Link>
                                             )}
                                         </div>

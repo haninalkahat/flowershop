@@ -79,7 +79,7 @@ export default function CheckoutPage() {
             clearCart();
             setOrderPlaced(true);
             setTimeout(() => {
-                router.push(`/orders`);
+                router.push(`/checkout/success/${orderData.orderId}`);
             }, 2000);
 
         } catch (err: any) {

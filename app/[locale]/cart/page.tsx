@@ -6,7 +6,7 @@ import { useCurrency } from '@/context/CurrencyContext'; // Added
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 export default function CartPage() {
   const { cart, updateCartItemQuantity, removeFromCart, getTotalPrice } = useCart();
@@ -14,6 +14,24 @@ export default function CartPage() {
   const { formatPrice } = useCurrency(); // Added
   const router = useRouter();
   const t = useTranslations('Cart');
+  const locale = useLocale();
+
+  const getLocalized = (item: any) => {
+    let name = item.name;
+    let description = item.description;
+
+    if (locale === 'tr') {
+      name = item.name_tr || item.name_en || item.name;
+      description = item.description_tr || item.description_en || item.description;
+    } else if (locale === 'ar') {
+      name = item.name_ar || item.name_en || item.name;
+      description = item.description_ar || item.description_en || item.description;
+    } else {
+      name = item.name_en || item.name;
+      description = item.description_en || item.description;
+    }
+    return { name, description };
+  };
 
   const handleCheckout = () => {
     if (!user) {
@@ -53,12 +71,13 @@ export default function CartPage() {
         {cart.map((item, index) => {
           const price = item.discountPrice !== null ? item.discountPrice : item.originalPrice;
           const key = `${item.id}-${item.selectedColor || 'default'}-${index}`; // Add index to ensure uniqueness if data is duplicated
+          const { name, description } = getLocalized(item);
 
           return (
             <div key={key} className="flex flex-col md:grid md:grid-cols-6 gap-4 p-4 md:p-6 border-b border-gray-100 items-start md:items-center">
               {/* Product Info */}
               <div className="col-span-3 flex w-full items-start space-x-4">
-                <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-50 border border-gray-100">
+                <Link href={`/shop/${item.id}`} className="relative w-20 h-20 md:w-24 md:h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-50 border border-gray-100 hover:opacity-90 transition-opacity">
                   <Image
                     src={item.imageUrl || (item.images && item.images[0]) || '/placeholder.jpg'}
                     alt={item.name}
@@ -66,10 +85,12 @@ export default function CartPage() {
                     className="object-contain p-1"
                     sizes="(max-width: 768px) 80px, 96px"
                   />
-                </div>
+                </Link>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-base md:text-lg text-gray-800 leading-tight mb-1">{item.name}</h3>
-                  <p className="text-xs md:text-sm text-gray-500 truncate max-w-xs mb-1">{item.description}</p>
+                  <Link href={`/shop/${item.id}`} className="font-semibold text-base md:text-lg text-gray-800 leading-tight mb-1 hover:text-pink-600 transition-colors">
+                    {name}
+                  </Link>
+                  <p className="text-xs md:text-sm text-gray-500 truncate max-w-xs mb-1">{description}</p>
                   {item.selectedColor && (
                     <p className="text-xs text-gray-500">Color: <span className="font-medium text-gray-700">{item.selectedColor}</span></p>
                   )}

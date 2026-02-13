@@ -80,6 +80,8 @@
         "priceLowHigh": "Price: Low to High",
         "priceHighLow": "Price: High to Low",
         "noProducts": "No products found.",
+        "searchPlaceholder": "Search for flowers...",
+        "noSearchMatch": "No products match your search.",
         "all": "All",
         "resetAll": "Reset All"
     },
@@ -105,7 +107,11 @@
     },
     "Admin": {
         "title": "Admin Panel",
+        "all": "All",
         "orders": "Orders",
+        "newOrders": "New Orders",
+        "unreadMessages": "Unread Messages",
+        "unreadQuestions": "Unread Questions",
         "products": "Products",
         "productQuestions": "Questions",
         "backToShop": "Back to Shop",
@@ -120,7 +126,10 @@
             "messages": "Messages",
             "actions": "Actions"
         },
+        "searchPlaceholder": "Search by ID, User, or Product...",
+        "noOrders": "No orders found matching your criteria.",
         "status": {
+            "all": "All",
             "awaitingPayment": "Awaiting Payment",
             "markAsPaid": "Mark as PAID",
             "preparing": "Preparing",
@@ -193,13 +202,18 @@
             "success": "Product created successfully",
             "error": "Failed to create product",
             "imageRequired": "At least one image is required",
-            "genericError": "Something went wrong"
+            "genericError": "Something went wrong",
+            "loading": "Loading...",
+            "backToShop": "Back to Shop",
+            "delete": "Delete Product",
+            "all": "All",
+            "editProduct": "Edit Product"
         }
     },
     "FlowerTypes": {
         "orchid": "Orchid",
         "tulip": "Tulip",
-        "sunflower": "Sunflower",
+        "sunflower": "SunFlower",
         "rose": "Rose",
         "mixed": "Mixed",
         "lily": "Lily",
@@ -254,7 +268,11 @@
         "newReply": "New Reply!",
         "order": "Order",
         "adminResponse": "Admin Response",
-        "waitingResponse": "Waiting for response..."
+        "waitingResponse": "Waiting for response...",
+        "addToCart": "Add to Cart",
+        "addedToCart": "Added to cart!",
+        "failedAddToCart": "Failed to add to cart.",
+        "productAddedToCart": "{name} added to cart! 🌸"
     },
     "Contact": {
         "getInTouch": "Get in Touch",
@@ -322,6 +340,17 @@
         "errorMissingFile": "Please upload a payment receipt.",
         "errorMissingMtcn": "Please upload the MTCN receipt.",
         "copied": "Copied to clipboard!"
+    },
+    "Success": {
+        "title": "Thank you for your order!",
+        "subtitle": "We have received your order and are waiting for payment confirmation.",
+        "orderId": "Order ID",
+        "items": "Items Purchased",
+        "total": "Total Amount",
+        "status": "Order Status",
+        "viewAllOrders": "View All Orders",
+        "backToShop": "Back to Shop",
+        "awaitingPayment": "Awaiting Payment"
     },
     "Footer": {
         "rightsReserved": "All rights reserved.",

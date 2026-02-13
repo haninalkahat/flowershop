@@ -1,8 +1,9 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Search, Filter, X } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { ChevronDown, ChevronRight, MessageCircle } from 'lucide-react';
 
@@ -14,14 +15,19 @@ interface Order {
     user: { fullName: string; email: string };
     receipt?: { imageUrl: string };
     createdAt: string;
-    paymentMethod: string;
     messages: any[];
+    isNewOrder: boolean;
 }
 
 export default function AdminOrdersPage() {
     const t = useTranslations('Admin');
+    const locale = useLocale();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // Search & Filter State
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
     // State for notification
     const [lastOrderCount, setLastOrderCount] = useState(0);
@@ -31,6 +37,7 @@ export default function AdminOrdersPage() {
         try {
             const res = await fetch('/api/admin/orders');
             const data = await res.json();
+
             if (data.orders) {
                 // Check for new orders if we already have data
                 if (lastOrderCount > 0 && data.orders.length > lastOrderCount) {
@@ -79,7 +86,10 @@ export default function AdminOrdersPage() {
                 body: JSON.stringify({ status: newStatus })
             });
             if (res.ok) {
-                setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+                // Optimistically update status AND remove 'NEW' tag
+                setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus, isNewOrder: false } : o));
+                // Signal sidebar to refresh stats
+                window.dispatchEvent(new Event('admin-stats-updated'));
             } else {
                 alert('Failed to update status');
             }
@@ -116,9 +126,21 @@ export default function AdminOrdersPage() {
 
     const handleOpenMessage = async (order: Order) => {
         setMessageOrder(order);
-        // Mark as read if there are unread messages
+
+        // Optimistically clear 'NEW' tag and mark messages as read
+        // We do this regardless of unread count because opening the modal is the "interaction" requested
+        // Prompt says: "Set isNewOrder: false as soon as the Admin opens the messaging modal"
+
+        // Mark as read if there are unread messages to the backend
         const unreadCount = order.messages.filter(m => !m.isAdmin && !m.isRead).length;
-        if (unreadCount > 0) {
+
+        // Always call read endpoint? The prompt says "Set isNewOrder: false as soon as the Admin opens...".
+        // My backend update for isNewOrder is inside the 'read' endpoint. 
+        // So I must call it even if unreadCount is 0 IF isNewOrder is true.
+        // But the 'read' endpoint is specific to messages.
+        // It might be better to ensure we call it if isNewOrder is true OR unreadCount > 0.
+
+        if (unreadCount > 0 || order.isNewOrder) {
             try {
                 await fetch(`/api/admin/orders/${order.id}/read`, { method: 'POST' });
                 // Optimistically update local state
@@ -126,6 +148,7 @@ export default function AdminOrdersPage() {
                     if (o.id === order.id) {
                         return {
                             ...o,
+                            isNewOrder: false,
                             messages: o.messages.map(m => m.isAdmin ? m : { ...m, isRead: true })
                         };
                     }
@@ -133,14 +156,56 @@ export default function AdminOrdersPage() {
                 }));
                 // Signal sidebar to refresh stats
                 window.dispatchEvent(new Event('admin-stats-updated'));
-                // Update the modal's data too if needed (it uses messageOrder state which is just a copy effectively, need to update that too if we want it reflected instantly in UI if we were filtering)
-                // Actually messageOrder is a state object, so separate set is needed or just rely on fetchOrders refresh if we wanted.
-                // But for "badge decreasing", updating 'orders' state is key.
             } catch (e) {
                 console.error("Failed to mark as read");
             }
+        } else {
+            // No unread messages and not new order, just open modal (already done via setMessageOrder)
         }
     };
+
+
+    // Filter Logic
+    const filteredOrders = useMemo(() => {
+        return orders.filter(order => {
+            // Status Filter
+            if (statusFilter !== 'ALL' && order.status !== statusFilter) return false;
+
+            // Search Query
+            if (searchQuery) {
+                const query = searchQuery.toLowerCase();
+                const idMatch = order.id.toLowerCase().includes(query);
+                const userMatch = order.user?.fullName?.toLowerCase().includes(query) || order.user?.email?.toLowerCase().includes(query);
+
+                // Product Search (recursive check in items)
+                const productMatch = order.items.some((item: any) => {
+                    const p = item.product || {};
+                    const name = p.name || '';
+                    const nameTr = p.name_tr || '';
+                    const nameEn = p.name_en || '';
+                    const nameAr = p.name_ar || '';
+
+                    return name.toLowerCase().includes(query) ||
+                        nameTr.toLowerCase().includes(query) ||
+                        nameEn.toLowerCase().includes(query) ||
+                        nameAr.toLowerCase().includes(query);
+                });
+
+                return idMatch || userMatch || productMatch;
+            }
+
+            return true;
+        });
+    }, [orders, searchQuery, statusFilter]);
+
+    // Compute Counts
+    const statusCounts = useMemo(() => {
+        const counts: Record<string, number> = { ALL: orders.length };
+        orders.forEach(order => {
+            counts[order.status] = (counts[order.status] || 0) + 1;
+        });
+        return counts;
+    }, [orders]);
 
     if (loading) return <div className="p-8 text-center">{t('loading')}</div>;
 
@@ -156,6 +221,25 @@ export default function AdminOrdersPage() {
         }
     };
 
+    const getStatusLabel = (status: string) => {
+        const key = status === 'AWAITING_PAYMENT' ? 'awaitingPayment' :
+            status === 'PAID' ? 'paid' :
+                status === 'markAsPaid' ? 'markAsPaid' : // Safety, though not a status
+                    status === 'REJECTED' ? 'rejected' :
+                        status === 'CANCELED' ? 'canceled' :
+                            status === 'PREPARING' ? 'preparing' :
+                                status === 'DELIVERED' ? 'delivered' : status.toLowerCase();
+        // @ts-ignore
+        return t(`status.${key}`);
+    };
+
+    const getProductName = (product: any) => {
+        if (!product) return 'Unknown Product';
+        if (locale === 'tr') return product.name_tr || product.name_en || product.name;
+        if (locale === 'ar') return product.name_ar || product.name_en || product.name;
+        return product.name_en || product.name;
+    };
+
     return (
         <div>
             <h1 className="text-2xl font-serif mb-6 flex justify-between items-center">
@@ -163,9 +247,53 @@ export default function AdminOrdersPage() {
                 <button onClick={() => fetchOrders()} className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded">{t('refresh')}</button>
             </h1>
 
+            {/* Search and Filters */}
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6 space-y-4">
+                {/* Search Bar */}
+                <div className="relative">
+                    <input
+                        type="text"
+                        placeholder={t('searchPlaceholder') || "Search orders..."}
+                        className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-pink-200 outline-none"
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
+                    />
+                    <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
+                    {searchQuery && (
+                        <button onClick={() => setSearchQuery('')} className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600">
+                            <X className="w-4 h-4" />
+                        </button>
+                    )}
+                </div>
+
+                {/* Status Tabs */}
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                    {['ALL', 'AWAITING_PAYMENT', 'PAID', 'PREPARING', 'DELIVERED', 'REJECTED', 'CANCELED'].map((status) => (
+                        <button
+                            key={status}
+                            onClick={() => setStatusFilter(status)}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${statusFilter === status
+                                ? 'bg-pink-600 text-white'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }`}
+                        >
+                            {status === 'ALL' ? t('all') : getStatusLabel(status)}
+                            <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] ${statusFilter === status ? 'bg-pink-500 text-white' : 'bg-gray-200 text-gray-600'
+                                }`}>
+                                {statusCounts[status] || 0}
+                            </span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             {/* Mobile Card View */}
             <div className="md:hidden space-y-4 mb-8">
-                {orders.map((order) => (
+                {filteredOrders.length === 0 ? (
+                    <div className="text-center py-12 bg-white rounded-lg border border-dashed text-gray-500">
+                        {t('noOrders')}
+                    </div>
+                ) : filteredOrders.map((order) => (
                     <div key={order.id} className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
                         <div className="p-4">
                             <div className="flex justify-between items-start mb-3">
@@ -173,10 +301,17 @@ export default function AdminOrdersPage() {
                                     <div className="text-xs font-mono text-gray-500 mb-1">#{order.id.slice(0, 8)}</div>
                                     <div className="font-medium">{order.user.fullName}</div>
                                 </div>
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                                <div className="ml-auto flex items-center gap-2">
+                                    <span className={`px-2 py-1 rounded-full text-xs font-bold uppercase ${getStatusColor(order.status)}`}>
+                                        {getStatusLabel(order.status)}
+                                    </span>
                                     {/* @ts-ignore */}
-                                    {t(`status.${order.status === 'AWAITING_PAYMENT' ? 'awaitingPayment' : order.status === 'PAID' ? 'paid' : order.status === 'PREPARING' ? 'preparing' : order.status === 'DELIVERED' ? 'delivered' : order.status === 'REJECTED' ? 'rejected' : order.status === 'CANCELED' ? 'canceled' : order.status.toLowerCase()}`)}
-                                </span>
+                                    {order.isNewOrder && (
+                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-pink-500 text-white animate-pulse">
+                                            NEW
+                                        </span>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="flex justify-between items-center mb-4 pb-4 border-b border-gray-100">
@@ -229,7 +364,7 @@ export default function AdminOrdersPage() {
                                             <img src={item.product?.images?.[0] || '/placeholder.png'} className="w-full h-full object-cover" />
                                         </Link>
                                         <div className="flex-1 min-w-0">
-                                            <div className="text-sm font-medium truncate">{item.product?.name}</div>
+                                            <div className="text-sm font-medium truncate">{getProductName(item.product)}</div>
                                             <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
                                                 <span>x{item.quantity}</span>
                                                 {item.selectedColor && (
@@ -262,7 +397,13 @@ export default function AdminOrdersPage() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {orders.map((order) => (
+                        {filteredOrders.length === 0 ? (
+                            <tr>
+                                <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                                    {t('noOrders')}
+                                </td>
+                            </tr>
+                        ) : filteredOrders.map((order) => (
                             <React.Fragment key={order.id}>
                                 <tr className="hover:bg-gray-50 border-b border-gray-100">
                                     <td className="px-6 py-4">
@@ -278,7 +419,17 @@ export default function AdminOrdersPage() {
                                             )}
                                         </button>
                                     </td>
-                                    <td className="px-6 py-4 font-mono text-xs text-left rtl:text-right">{order.id.slice(0, 8)}...</td>
+                                    <td className="px-6 py-4 font-mono text-xs text-left rtl:text-right">
+                                        <div className="flex items-center gap-2">
+                                            {order.id.slice(0, 8)}...
+                                            {/* @ts-ignore */}
+                                            {order.isNewOrder && (
+                                                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-pink-500 text-white animate-pulse">
+                                                    NEW
+                                                </span>
+                                            )}
+                                        </div>
+                                    </td>
                                     <td className="px-6 py-4 text-left rtl:text-right">
                                         <div className="font-medium">{order.user.fullName}</div>
                                         <div className="text-gray-500 text-xs">{order.user.email}</div>
@@ -286,8 +437,7 @@ export default function AdminOrdersPage() {
                                     <td className="px-6 py-4 font-bold text-gray-900 text-left rtl:text-right">${Number(order.totalAmount).toFixed(2)}</td>
                                     <td className="px-6 py-4 text-left rtl:text-right">
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                                            {/* @ts-ignore */}
-                                            {t(`status.${order.status === 'AWAITING_PAYMENT' ? 'awaitingPayment' : order.status === 'PAID' ? 'paid' : order.status === 'PREPARING' ? 'preparing' : order.status === 'DELIVERED' ? 'delivered' : order.status === 'REJECTED' ? 'rejected' : order.status === 'CANCELED' ? 'canceled' : order.status.toLowerCase()}`)}
+                                            {getStatusLabel(order.status)}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-left rtl:text-right">
@@ -346,7 +496,7 @@ export default function AdminOrdersPage() {
                                                                 target="_blank"
                                                                 className="text-sm font-medium text-gray-900 hover:text-pink-600 truncate block transition-colors"
                                                             >
-                                                                {item.product?.name}
+                                                                {getProductName(item.product)}
                                                             </Link>
                                                             <div className="text-xs text-gray-500 mt-0.5 flex flex-wrap gap-2">
                                                                 <span>Qty: {item.quantity}</span>
@@ -388,7 +538,7 @@ export default function AdminOrdersPage() {
                                                         className="flex items-center gap-2 p-1.5 cursor-pointer hover:opacity-80 transition-opacity"
                                                     >
                                                         <img src={item.product?.images?.[0] || '/placeholder.png'} alt={item.product?.name} className="w-8 h-8 rounded object-cover" />
-                                                        <span className="text-xs font-medium max-w-[100px] truncate">{item.product?.name}</span>
+                                                        <span className="text-xs font-medium max-w-[100px] truncate">{getProductName(item.product)}</span>
                                                     </Link>
                                                 )}
                                             </div>

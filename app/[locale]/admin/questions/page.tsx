@@ -14,6 +14,7 @@ interface ProductQuestion {
     product: { id: string; name: string; images: string[] };
     createdAt: string;
     answeredAt?: string;
+    isReadByAdmin: boolean;
 }
 
 export default function AdminQuestionsPage() {
@@ -42,6 +43,10 @@ export default function AdminQuestionsPage() {
             console.error('Failed to fetch questions');
         } finally {
             setLoading(false);
+            // Mark as viewed
+            fetch('/api/admin/questions/viewed', { method: 'POST' }).then(() => {
+                window.dispatchEvent(new Event('admin-stats-updated'));
+            });
         }
     };
 
@@ -132,7 +137,12 @@ export default function AdminQuestionsPage() {
                             {/* Question & Answer */}
                             <div className="flex-1">
                                 <div className="mb-4">
-                                    <h3 className="font-bold text-gray-900 mb-1">{q.user?.fullName} <span className="font-normal text-gray-500 text-sm">asks:</span></h3>
+                                    <h3 className="font-bold text-gray-900 mb-1 flex items-center gap-2">
+                                        {q.user?.fullName} <span className="font-normal text-gray-500 text-sm">asks:</span>
+                                        {!q.isReadByAdmin && (
+                                            <span className="bg-pink-500 text-white text-[10px] px-2 py-0.5 rounded font-bold animate-pulse">NEW</span>
+                                        )}
+                                    </h3>
                                     <p className="bg-gray-50 p-3 rounded-l-lg border-l-4 border-gray-300 italic text-gray-800">
                                         "{q.question}"
                                     </p>

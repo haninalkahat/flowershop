@@ -13,12 +13,12 @@ export default function AdminSidebar() {
 
     const isActive = (path: string) => pathname === path || pathname?.startsWith(path + '/');
 
-    const [stats, setStats] = useState({ newOrdersCount: 0, unreadMessagesCount: 0 });
+    const [stats, setStats] = useState({ newOrdersCount: 0, unreadMessagesCount: 0, unreadQuestionsCount: 0 });
 
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const res = await fetch('/api/admin/stats');
+                const res = await fetch('/api/admin/stats', { cache: 'no-store', next: { revalidate: 0 } });
                 if (res.ok) {
                     const data = await res.json();
                     setStats(data);
@@ -29,11 +29,18 @@ export default function AdminSidebar() {
         };
 
         fetchStats();
+        // Listener for real-time updates
+        const handleStatsUpdate = () => {
+            console.log('Admin stats update event received');
+            fetchStats();
+        };
+
+        window.addEventListener('admin-stats-updated', handleStatsUpdate);
         const interval = setInterval(fetchStats, 30000); // Poll every 30s
-        window.addEventListener('admin-stats-updated', fetchStats);
+
         return () => {
             clearInterval(interval);
-            window.removeEventListener('admin-stats-updated', fetchStats);
+            window.removeEventListener('admin-stats-updated', handleStatsUpdate);
         };
     }, []);
 
@@ -56,11 +63,18 @@ export default function AdminSidebar() {
                         <ShoppingBag size={20} />
                         {t('orders')}
                     </div>
-                    {(stats.newOrdersCount + stats.unreadMessagesCount) > 0 && (
-                        <span className="bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                            {stats.newOrdersCount + stats.unreadMessagesCount}
-                        </span>
-                    )}
+                    <div className="flex items-center gap-1">
+                        {stats.unreadMessagesCount > 0 && (
+                            <span className="bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full" title={t('unreadMessages')}>
+                                {stats.unreadMessagesCount}
+                            </span>
+                        )}
+                        {stats.newOrdersCount > 0 && (
+                            <span className="bg-pink-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full" title={t('newOrders')}>
+                                {stats.newOrdersCount}
+                            </span>
+                        )}
+                    </div>
                 </Link>
                 <Link
                     href="/admin/products"
@@ -76,8 +90,12 @@ export default function AdminSidebar() {
                     <div className="flex items-center gap-3">
                         <MessageCircle size={20} />
                         {t('productQuestions')}
+                        {stats.unreadQuestionsCount > 0 && (
+                            <span className="bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full ml-auto" title={t('unreadQuestions')}>
+                                {stats.unreadQuestionsCount}
+                            </span>
+                        )}
                     </div>
-                    {/* Add question specific badge logic if needed later, for now maybe just messages total */}
                     {/* User requested 'unreadMessagesCount' for Orders tab or similar, but typically MessageCircle is for direct messages/questions. 
                         Wait, the user said: "New Messages: The 'Orders' tab badge should also include (or show separately) the total count of unread messages from all customers."
                         This implies messages are tied to orders. So the orders tab badge should show unread messages too? 
