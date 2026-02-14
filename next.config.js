@@ -15,6 +15,7 @@ const nextConfig = {
                 hostname: '*.public.blob.vercel-storage.com',
             },
         ],
+        qualities: [75, 100],
     },
 };
 

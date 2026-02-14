@@ -12,9 +12,9 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' });
-const cairo = Cairo({ subsets: ['arabic'], variable: '--font-cairo' });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
+const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair', display: 'swap' });
+const cairo = Cairo({ subsets: ['arabic'], variable: '--font-cairo', display: 'swap' });
 
 export const metadata: Metadata = {
   title: 'Flowershop',
@@ -38,12 +38,12 @@ export default async function RootLayout({
 
   const messages = await getMessages();
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
-  // Include all font variables to prevent "preloaded but not used" warning, but apply specific font class based on locale
-  const fonts = `${cairo.variable} ${inter.variable} ${playfair.variable} ${locale === 'ar' ? cairo.className : 'font-sans'}`;
+  // Include font variables based on locale to prevent "preloaded but not used" warning
+  const fonts = `${inter.variable} ${playfair.variable} ${locale === 'ar' ? cairo.variable + ' ' + cairo.className : 'font-sans'}`;
 
   return (
     <html lang={locale} dir={dir}>
-      <body className={`${fonts} antialiased text-gray-800 bg-gray-50 transition-colors duration-300`}>
+      <body className={`${fonts} antialiased text-gray-800 bg-gray-50 transition-colors duration-300`} suppressHydrationWarning={true}>
         <NextIntlClientProvider messages={messages}>
           <AuthProvider>
             <CartProvider>

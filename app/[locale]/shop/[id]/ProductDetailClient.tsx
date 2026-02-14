@@ -179,7 +179,18 @@ export default function ProductDetailClient({ product, initialColor }: { product
                 selectedColor: selectedColor !== 'Original' ? selectedColor : undefined
             }, quantity);
 
-            toast.success(tCommon('productAddedToCart', { name: displayName }));
+            toast.success(tCommon('productAddedToCart', { name: displayName }), {
+                position: 'top-center',
+                style: {
+                    background: '#ECFDF5', // Light green
+                    color: '#065F46',     // Dark green
+                    border: '1px solid #A7F3D0',
+                },
+                iconTheme: {
+                    primary: '#10B981', // Green icon
+                    secondary: '#ECFDF5',
+                },
+            });
         } catch (error) {
             toast.error(tCommon('failedAddToCart'));
         } finally {
@@ -189,7 +200,7 @@ export default function ProductDetailClient({ product, initialColor }: { product
 
     return (
         <main className="min-h-screen bg-white pt-24 pb-20">
-            <div className="container mx-auto px-6 max-w-6xl">
+            <div className="container mx-auto px-4 md:px-6 max-w-6xl overflow-hidden">
                 {/* Breadcrumb */}
                 <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
                     <Link href="/shop" className="hover:text-pink-600 transition-colors flex items-center gap-1">
@@ -255,7 +266,8 @@ export default function ProductDetailClient({ product, initialColor }: { product
                             {displayName}
                         </h1>
                         {/* Price & Rating */}
-                        <div className="flex items-center gap-4 mb-6">
+                        {/* Price & Rating */}
+                        <div className="flex flex-wrap items-center gap-4 mb-6">
                             <span className="text-3xl font-medium text-gray-900">
                                 {formatPrice(currentPrice)}
                             </span>
@@ -269,7 +281,7 @@ export default function ProductDetailClient({ product, initialColor }: { product
                                     </span>
                                 </>
                             )}
-                            <div className="flex items-center gap-1 ml-auto">
+                            <div className="flex items-center gap-1 md:ml-auto w-full md:w-auto mt-2 md:mt-0">
                                 <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                                 <span className="text-sm font-bold text-gray-900">{reviewStats.average.toFixed(1)}</span>
                                 <span className="text-sm text-gray-400">({reviewStats.count} reviews)</span>
@@ -332,50 +344,53 @@ export default function ProductDetailClient({ product, initialColor }: { product
                         )}
 
                         {/* Actions */}
-                        <div className="flex items-center gap-4 border-t border-gray-100 pt-8">
+                        {/* Actions */}
+                        <div className="flex flex-wrap md:flex-nowrap items-center gap-3 border-t border-gray-100 pt-6 mt-6">
                             {/* Quantity */}
-                            <div className="flex items-center border border-gray-200 rounded-full px-4 py-2 md:px-4 md:py-3 gap-3 md:gap-4">
+                            <div className="order-1 h-12 flex items-center border border-gray-200 rounded-full px-3 gap-3 shrink-0">
                                 <button
                                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                    className="text-gray-400 hover:text-gray-900 transition-colors"
+                                    className="text-gray-400 hover:text-gray-900 transition-colors p-1"
                                 >
-                                    <Minus className="w-3.5 h-3.5" />
+                                    <Minus className="w-4 h-4" />
                                 </button>
                                 <span className="font-bold text-gray-900 w-4 text-center text-sm">{quantity}</span>
                                 <button
                                     onClick={() => setQuantity(quantity + 1)}
-                                    className="text-gray-400 hover:text-gray-900 transition-colors"
+                                    className="text-gray-400 hover:text-gray-900 transition-colors p-1"
                                 >
-                                    <Plus className="w-3.5 h-3.5" />
+                                    <Plus className="w-4 h-4" />
                                 </button>
                             </div>
 
-                            {/* Add to Cart */}
+                            {/* Wishlist (Heart) - Reordered for mobile layout */}
+                            <button
+                                onClick={toggleWishlist}
+                                className={`order-2 md:order-3 h-12 w-12 shrink-0 rounded-full border transition-all flex items-center justify-center ${isFavorite ? 'bg-pink-50 border-pink-200 text-pink-500' : 'border-gray-200 hover:border-pink-300 text-gray-400 hover:text-pink-500'}`}
+                            >
+                                <Heart className={`w-5 h-5 md:w-6 md:h-6 ${isFavorite ? 'fill-pink-500' : ''}`} />
+                            </button>
+
+                            {/* Add to Cart - Full width on mobile wrap */}
                             <button
                                 onClick={handleAddToCart}
                                 disabled={loading}
-                                className={`flex-1 bg-gray-900 text-white font-bold py-2 md:py-4 px-4 text-xs md:text-base rounded-full transition-all shadow-lg shadow-gray-200 flex items-center justify-center gap-2 ${loading
+                                className={`order-3 md:order-2 w-full md:w-auto flex-1 h-12 bg-gray-900 text-white font-bold px-4 text-sm md:text-base rounded-full transition-all shadow-lg shadow-gray-200 flex items-center justify-center gap-2 whitespace-nowrap ${loading
                                     ? 'opacity-80 cursor-not-allowed scale-[0.98]'
                                     : 'hover:bg-pink-600 hover:shadow-pink-200'
                                     }`}
                             >
                                 {loading ? (
                                     <>
-                                        <Loader2 className="w-3.5 h-3.5 md:w-5 md:h-5 animate-spin" />
+                                        <Loader2 className="w-5 h-5 animate-spin" />
                                         <span>{t('adding')}</span>
                                     </>
                                 ) : (
                                     <>
-                                        <ShoppingCart className="w-3.5 h-3.5 md:w-5 md:h-5" />
+                                        <ShoppingCart className="w-5 h-5" />
                                         <span>{tCommon('addToCart')} - {formatPrice(currentPrice * quantity)}</span>
                                     </>
                                 )}
-                            </button>
-                            <button
-                                onClick={toggleWishlist}
-                                className={`p-2 md:p-4 rounded-full border transition-all flex items-center justify-center ${isFavorite ? 'bg-pink-50 border-pink-200 text-pink-500' : 'border-gray-200 hover:border-pink-300 text-gray-400 hover:text-pink-500'}`}
-                            >
-                                <Heart className={`w-4 h-4 md:w-6 md:h-6 ${isFavorite ? 'fill-pink-500' : ''}`} />
                             </button>
                         </div>
                     </div>
