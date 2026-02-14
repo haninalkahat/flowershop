@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { toast } from 'react-hot-toast';
 
 interface ProductQuestion {
     id: string;
@@ -64,12 +65,12 @@ export default function AdminQuestionsPage() {
                 setQuestions(questions.map(q => q.id === id ? { ...q, answer: updated.answer, answeredAt: updated.answeredAt } : q));
                 setReplyingTo(null);
                 setAnswerText('');
-                alert('Answer sent/updated!');
+                toast.success(t('questions.answerSent'));
             } else {
-                alert('Failed to send answer');
+                toast.error(t('questions.answerFailed'));
             }
         } catch (err) {
-            alert('Error sending answer');
+            toast.error(t('questions.answerError'));
         } finally {
             setSubmitting(false);
         }
@@ -85,10 +86,10 @@ export default function AdminQuestionsPage() {
             });
             if (res.ok) {
                 setQuestions(questions.map(q => q.id === id ? { ...q, answer: undefined, answeredAt: undefined } : q));
-                alert('Answer deleted');
+                toast.success(t('questions.answerDeleted'));
             }
         } catch (err) {
-            alert('Error deleting answer');
+            toast.error(t('questions.answerDeleteError'));
         }
     };
 
@@ -99,9 +100,9 @@ export default function AdminQuestionsPage() {
             const res = await fetch(`/api/admin/questions/${id}`, { method: 'DELETE' });
             if (res.ok) {
                 setQuestions(questions.filter(q => q.id !== id));
-                alert('Question deleted');
+                toast.success(t('questions.questionDeleted'));
             }
-        } catch (err) { alert('Error deleting question'); }
+        } catch (err) { toast.error(t('questions.questionDeleteError')); }
     };
 
     if (loading) return <div className="p-8 text-center">Loading questions...</div>;

@@ -208,6 +208,23 @@
             "delete": "Delete Product",
             "all": "All",
             "editProduct": "Edit Product"
+        },
+        "questions": {
+            "answerSent": "Answer sent successfully!",
+            "answerFailed": "Failed to send answer",
+            "answerError": "Error sending answer",
+            "answerDeleted": "Answer deleted",
+            "answerDeleteError": "Error deleting answer",
+            "questionDeleted": "Question deleted",
+            "questionDeleteError": "Error deleting question"
+        },
+        "orderNotifications": {
+            "newOrderReceived": "New Order Received!",
+            "statusUpdateFailed": "Failed to update status",
+            "statusUpdateError": "Error updating status",
+            "replySent": "Reply sent!",
+            "replyFailed": "Failed to send reply",
+            "replyError": "Error sending reply"
         }
     },
     "FlowerTypes": {
@@ -259,7 +276,10 @@
         "deliveredDesc": "Enjoy your flowers!",
         "processingDesc": "We are processing your order.",
         "support": "Laffa Support",
-        "me": "Me"
+        "me": "Me",
+        "messageSent": "Message sent!",
+        "messageFailed": "Failed to send message",
+        "messageError": "Error sending message"
     },
     "Common": {
         "support": "Laffa Support",

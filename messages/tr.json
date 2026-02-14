@@ -208,6 +208,23 @@
             "delete": "Ürünü Sil",
             "all": "Tümü",
             "editProduct": "Ürünü Düzenle"
+        },
+        "questions": {
+            "answerSent": "Yanıt başarıyla gönderildi!",
+            "answerFailed": "Yanıt gönderilemedi",
+            "answerError": "Yanıt gönderilirken hata oluştu",
+            "answerDeleted": "Yanıt silindi",
+            "answerDeleteError": "Yanıt silinirken hata oluştu",
+            "questionDeleted": "Soru silindi",
+            "questionDeleteError": "Soru silinirken hata oluştu"
+        },
+        "orderNotifications": {
+            "newOrderReceived": "Yeni Sipariş Alındı!",
+            "statusUpdateFailed": "Durum güncellenemedi",
+            "statusUpdateError": "Durum güncellenirken hata oluştu",
+            "replySent": "Yanıt gönderildi!",
+            "replyFailed": "Yanıt gönderilemedi",
+            "replyError": "Yanıt gönderilirken hata oluştu"
         }
     },
     "FlowerTypes": {
@@ -259,7 +276,10 @@
         "deliveredDesc": "Çiçeklerinizin tadını çıkarın!",
         "processingDesc": "Siparişiniz işleme alınıyor.",
         "support": "Laffa Destek",
-        "me": "Ben"
+        "me": "Ben",
+        "messageSent": "Mesaj gönderildi!",
+        "messageFailed": "Mesaj gönderilemedi",
+        "messageError": "Mesaj gönderilirken hata oluştu"
     },
     "Common": {
         "support": "Laffa Destek",

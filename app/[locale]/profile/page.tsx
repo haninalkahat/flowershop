@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { User, Lock, ShoppingBag, Truck, MessageCircle, Send, X, Package, HelpCircle, ChevronDown } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { Link } from '@/i18n/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 
@@ -290,11 +291,12 @@ function ProfileContent() {
                 setMessageContent('');
                 // Also update the main orders list
                 setOrders(orders.map(o => o.id === messageOrder.id ? { ...o, messages: [...(o.messages || []), data.message] } : o));
+                toast.success(t('messageSent'));
             } else {
-                alert('Failed to send message');
+                toast.error(t('messageFailed'));
             }
         } catch (err) {
-            alert('Error sending message');
+            toast.error(t('messageError'));
         } finally {
             setSendingMessage(false);
         }

@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { MessageCircle } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 interface Question {
     id: string;
@@ -55,16 +56,16 @@ export default function ProductQuestions({ productId }: ProductQuestionsProps) {
             });
 
             if (res.ok) {
-                alert(t('success'));
+                toast.success(t('success'));
                 setShowForm(false);
                 setNewQuestion('');
                 fetchQuestions();
             } else {
                 const error = await res.json();
-                alert(error.error || t('error'));
+                toast.error(error.error || t('error'));
             }
         } catch (err) {
-            alert(t('error'));
+            toast.error(t('error'));
         } finally {
             setSubmitting(false);
         }

@@ -49,7 +49,37 @@ export default async function RootLayout({
             <CartProvider>
               <CurrencyProvider>
                 <WishlistProvider>
-                  <Toaster position="top-center" toastOptions={{ duration: 3000, style: { background: '#333', color: '#fff' } }} />
+                  <Toaster
+                    position="bottom-right"
+                    toastOptions={{
+                      duration: 4000,
+                      style: {
+                        background: '#FDF2F8',
+                        color: '#831843',
+                        border: '1px solid #FBCFE8',
+                        padding: '16px',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                      },
+                      success: {
+                        iconTheme: {
+                          primary: '#DB2777',
+                          secondary: '#FDF2F8',
+                        },
+                      },
+                      error: {
+                        style: {
+                          background: '#FEF2F2',
+                          color: '#991B1B',
+                          border: '1px solid #FECACA',
+                        },
+                        iconTheme: {
+                          primary: '#EF4444',
+                          secondary: '#FEF2F2',
+                        }
+                      }
+                    }}
+                  />
                   <Navbar />
                   {children}
                   <Footer />

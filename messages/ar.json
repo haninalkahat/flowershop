@@ -208,6 +208,23 @@
             "delete": "حذف المنتج",
             "all": "الكل",
             "editProduct": "تعديل المنتج"
+        },
+        "questions": {
+            "answerSent": "تم إرسال الرد بنجاح!",
+            "answerFailed": "فشل إرسال الرد",
+            "answerError": "خطأ في إرسال الرد",
+            "answerDeleted": "تم حذف الرد",
+            "answerDeleteError": "خطأ في حذف الرد",
+            "questionDeleted": "تم حذف السؤال",
+            "questionDeleteError": "خطأ في حذف السؤال"
+        },
+        "orderNotifications": {
+            "newOrderReceived": "تم استلام طلب جديد!",
+            "statusUpdateFailed": "فشل تحديث الحالة",
+            "statusUpdateError": "خطأ في تحديث الحالة",
+            "replySent": "تم إرسال الرد!",
+            "replyFailed": "فشل إرسال الرد",
+            "replyError": "خطأ في إرسال الرد"
         }
     },
     "FlowerTypes": {
@@ -259,7 +276,10 @@
         "deliveredDesc": "استمتع بزهورك!",
         "processingDesc": "نحن نعالج طلبك.",
         "support": "دعم لافا",
-        "me": "أنا"
+        "me": "أنا",
+        "messageSent": "تم إرسال الرسالة!",
+        "messageFailed": "فشل إرسال الرسالة",
+        "messageError": "خطأ في إرسال الرسالة"
     },
     "Common": {
         "support": "دعم لافا",

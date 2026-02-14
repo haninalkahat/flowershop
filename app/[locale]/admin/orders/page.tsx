@@ -5,6 +5,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Search, Filter, X } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { toast } from 'react-hot-toast';
 import { ChevronDown, ChevronRight, MessageCircle } from 'lucide-react';
 
 interface Order {
@@ -44,7 +45,7 @@ export default function AdminOrdersPage() {
                     // Play sound or show toast
                     const audio = new Audio('/notification.mp3'); // Assuming file exists or fails gracefully
                     audio.play().catch(() => { });
-                    alert('New Order Received!'); // Simple alert for now, can be upgraded to Toast
+                    toast.success(t('orderNotifications.newOrderReceived'));
                 }
                 setOrders(data.orders);
                 setLastOrderCount(data.orders.length);
@@ -91,10 +92,10 @@ export default function AdminOrdersPage() {
                 // Signal sidebar to refresh stats
                 window.dispatchEvent(new Event('admin-stats-updated'));
             } else {
-                alert('Failed to update status');
+                toast.error(t('orderNotifications.statusUpdateFailed'));
             }
         } catch (err) {
-            alert('Error updating status');
+            toast.error(t('orderNotifications.statusUpdateError'));
         }
     };
 
@@ -110,15 +111,15 @@ export default function AdminOrdersPage() {
                 body: JSON.stringify({ content: replyContent })
             });
             if (res.ok) {
-                alert('Reply sent!');
+                toast.success(t('orderNotifications.replySent'));
                 setReplyContent('');
                 setMessageOrder(null);
                 fetchOrders(); // Refresh to show new message count if we tracked it, or just refresh
             } else {
-                alert('Failed to send reply');
+                toast.error(t('orderNotifications.replyFailed'));
             }
         } catch (err) {
-            alert('Error sending reply');
+            toast.error(t('orderNotifications.replyError'));
         } finally {
             setSendingReply(false);
         }

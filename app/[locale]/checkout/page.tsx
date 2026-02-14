@@ -6,6 +6,7 @@ import { useCart } from '@/context/CartContext';
 import { useCurrency } from '@/context/CurrencyContext'; // Added
 import { useRouter } from '@/i18n/navigation';
 import { Copy, Upload, CheckCircle, AlertCircle } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 
@@ -33,7 +34,7 @@ export default function CheckoutPage() {
 
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
-        alert(t('copied'));
+        toast.success(t('copied'));
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

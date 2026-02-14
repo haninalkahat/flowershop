@@ -3,6 +3,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { toast } from 'react-hot-toast';
 
 interface Review {
     id: string;
@@ -61,17 +62,17 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
             });
 
             if (res.ok) {
-                alert(t('success'));
+                toast.success(t('success'));
                 setShowForm(false);
                 setNewComment('');
                 setNewRating(5);
                 fetchReviews();
             } else {
                 const error = await res.json();
-                alert(error.error || t('error'));
+                toast.error(error.error || t('error'));
             }
         } catch (err) {
-            alert(t('error'));
+            toast.error(t('error'));
         } finally {
             setSubmitting(false);
         }
