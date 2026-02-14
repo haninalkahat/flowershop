@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, Filter, X, Eye, CheckCircle, Copy } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { toast } from 'react-hot-toast';
@@ -13,7 +13,7 @@ interface Order {
     totalAmount: string;
     status: string;
     items: any[];
-    user: { fullName: string; email: string };
+    user: { fullName: string; email: string; phoneNumber?: string; address?: string; city?: string };
     receipt?: { imageUrl: string };
     createdAt: string;
     messages: any[];
@@ -65,6 +65,7 @@ export default function AdminOrdersPage() {
 
 
     const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
+    const [viewingReceiptOrder, setViewingReceiptOrder] = useState<Order | null>(null);
 
     const toggleRow = (orderId: string) => {
         setExpandedOrders(prev => {
@@ -301,6 +302,19 @@ export default function AdminOrdersPage() {
                                 <div>
                                     <div className="text-xs font-mono text-gray-500 mb-1">#{order.id.slice(0, 8)}</div>
                                     <div className="font-medium">{order.user.fullName}</div>
+                                    <div className="text-xs text-gray-500 mt-2 max-w-[200px]">
+                                        <div className="mb-1 text-gray-700">{order.user.phoneNumber}</div>
+                                        <div className="flex items-center gap-2 cursor-pointer active:text-pink-600 bg-gray-50 p-1.5 rounded-md border border-gray-100"
+                                            onClick={() => {
+                                                const text = `${order.user.fullName}\n${order.user.address}\n${order.user.city}\n${order.user.phoneNumber}`;
+                                                navigator.clipboard.writeText(text);
+                                                toast.success(t('copied'));
+                                            }}
+                                        >
+                                            <span className="truncate flex-1 font-medium">{order.user.address}, {order.user.city}</span>
+                                            <Copy className="w-5 h-5 text-gray-400 shrink-0" />
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="ml-auto flex items-center gap-2">
                                     <span className={`px-2 py-1 rounded-full text-xs font-bold uppercase ${getStatusColor(order.status)}`}>
@@ -319,6 +333,27 @@ export default function AdminOrdersPage() {
                                 <span className="text-lg font-bold text-gray-900">${Number(order.totalAmount).toFixed(2)}</span>
                                 <span className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</span>
                             </div>
+
+                            {/* Receipt Thumbnail (Mobile) */}
+                            {order.receipt && (
+                                <div className="mb-4">
+                                    <span className="text-xs font-semibold text-gray-500 block mb-1">{t('table.receipt')}</span>
+                                    <div className="flex items-center gap-3">
+                                        <div
+                                            className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200 cursor-pointer hover:opacity-90"
+                                            onClick={() => setViewingReceiptOrder(order)}
+                                        >
+                                            <img src={order.receipt.imageUrl} alt="Receipt" className="w-full h-full object-cover" />
+                                        </div>
+                                        <button
+                                            onClick={() => setViewingReceiptOrder(order)}
+                                            className="text-sm text-pink-600 hover:text-pink-700 font-medium underline"
+                                        >
+                                            View Receipt
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="grid grid-cols-2 gap-3 mb-4">
                                 <button
@@ -393,6 +428,7 @@ export default function AdminOrdersPage() {
                             <th className="px-6 py-3 text-left rtl:text-right font-medium text-gray-500">{t('table.user')}</th>
                             <th className="px-6 py-3 text-left rtl:text-right font-medium text-gray-500">{t('table.total')}</th>
                             <th className="px-6 py-3 text-left rtl:text-right font-medium text-gray-500">{t('table.status')}</th>
+                            <th className="px-6 py-3 text-left rtl:text-right font-medium text-gray-500">{t('table.receipt')}</th>
                             <th className="px-6 py-3 text-left rtl:text-right font-medium text-gray-500">{t('table.messages')}</th>
                             <th className="px-6 py-3 text-left rtl:text-right font-medium text-gray-500">{t('table.actions')}</th>
                         </tr>
@@ -434,12 +470,49 @@ export default function AdminOrdersPage() {
                                     <td className="px-6 py-4 text-left rtl:text-right">
                                         <div className="font-medium">{order.user.fullName}</div>
                                         <div className="text-gray-500 text-xs">{order.user.email}</div>
+                                        {/* Phone & Address */}
+                                        <div className="mt-1 text-xs text-gray-500 font-mono">
+                                            <div>{order.user.phoneNumber}</div>
+                                            <div className="flex items-center gap-1 group/addr cursor-pointer"
+                                                onClick={() => {
+                                                    const text = `${order.user.fullName}\n${order.user.address}\n${order.user.city}\n${order.user.phoneNumber}`;
+                                                    navigator.clipboard.writeText(text);
+                                                    toast.success(t('copied'));
+                                                }}
+                                                title="Copy Full Address"
+                                            >
+                                                <span className="truncate max-w-[150px]">{order.user.address}, {order.user.city}</span>
+                                                <Copy className="w-3 h-3 text-gray-300 group-hover/addr:text-pink-500" />
+                                            </div>
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4 font-bold text-gray-900 text-left rtl:text-right">${Number(order.totalAmount).toFixed(2)}</td>
                                     <td className="px-6 py-4 text-left rtl:text-right">
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                                             {getStatusLabel(order.status)}
                                         </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-left rtl:text-right">
+                                        {/* Receipt Thumbnail (Desktop) */}
+                                        {order.receipt ? (
+                                            <div className="flex items-center gap-2 group">
+                                                <button
+                                                    onClick={() => setViewingReceiptOrder(order)}
+                                                    className="relative w-10 h-10 rounded border border-gray-200 overflow-hidden hover:ring-2 hover:ring-pink-200 transition-all"
+                                                >
+                                                    <img src={order.receipt.imageUrl} alt="Receipt" className="w-full h-full object-cover" />
+                                                </button>
+                                                <button
+                                                    onClick={() => setViewingReceiptOrder(order)}
+                                                    className="p-1.5 text-gray-400 hover:text-pink-600 rounded-full hover:bg-pink-50 transition-colors"
+                                                    title={t('viewReply')} // Use generic view
+                                                >
+                                                    <Eye size={16} />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <span className="text-xs text-gray-400 italic">-</span>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4 text-left rtl:text-right">
                                         <button
@@ -586,6 +659,85 @@ export default function AdminOrdersPage() {
                     </div>
                 )
             }
+
+            {/* Receipt Modal */}
+            {viewingReceiptOrder && viewingReceiptOrder.receipt && (
+                <div
+                    className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[60] animate-in fade-in duration-200"
+                    onClick={() => setViewingReceiptOrder(null)}
+                >
+                    <div
+                        className="relative bg-white rounded-xl overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        {/* Header */}
+                        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                            <div>
+                                <h3 className="font-bold text-gray-900">{t('table.receipt')}</h3>
+                                <p className="text-sm text-gray-500">Order #{viewingReceiptOrder.id.slice(0, 8)} - {viewingReceiptOrder.user.fullName}</p>
+                            </div>
+                            <button
+                                onClick={() => setViewingReceiptOrder(null)}
+                                className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+                            >
+                                <X size={20} className="text-gray-500" />
+                            </button>
+                        </div>
+
+                        {/* Image Container */}
+                        <div className="flex-1 overflow-auto p-4 bg-gray-900 flex items-center justify-center">
+                            <img
+                                src={viewingReceiptOrder.receipt.imageUrl}
+                                alt="Payment Receipt"
+                                className="max-w-full max-h-[60vh] object-contain rounded shadow-lg"
+                            />
+                        </div>
+
+                        {/* Footer Actions */}
+                        <div className="p-4 border-t border-gray-100 bg-white flex justify-end gap-3 items-center">
+                            <div className="mr-auto text-sm">
+                                <span className="text-gray-500">Current Status: </span>
+                                <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${getStatusColor(viewingReceiptOrder.status)}`}>
+                                    {getStatusLabel(viewingReceiptOrder.status)}
+                                </span>
+                            </div>
+
+                            <a
+                                href={viewingReceiptOrder.receipt.imageUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium text-sm hover:underline"
+                            >
+                                Open Original
+                            </a>
+
+                            {(viewingReceiptOrder.status === 'AWAITING_PAYMENT' || viewingReceiptOrder.status === 'PREPARING') && (
+                                <button
+                                    onClick={() => {
+                                        updateStatus(viewingReceiptOrder.id, 'PAID');
+                                        setViewingReceiptOrder(null);
+                                        toast.success(t('status.markAsPaid') + ' ' + t('success'));
+                                    }}
+                                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg font-bold transition-colors shadow-lg shadow-green-200"
+                                >
+                                    <CheckCircle size={18} />
+                                    Confirm Payment
+                                </button>
+                            )}
+
+                            {viewingReceiptOrder.status === 'PAID' && (
+                                <button
+                                    className="flex items-center gap-2 bg-gray-100 text-gray-400 px-5 py-2.5 rounded-lg font-bold cursor-not-allowed"
+                                    disabled
+                                >
+                                    <CheckCircle size={18} />
+                                    Payment Confirmed
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div >
     );
 }

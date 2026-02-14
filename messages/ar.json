@@ -65,7 +65,7 @@
     },
     "Home": {
         "heroTitle": "أزهر يومك",
-        "heroSubtitle": "أسعد أحبائك بأجمل وأرقى الزهور الطازجة.",
+        "heroSubtitle": "أسعد أحبّاءك بأجمل وأرقى الزهور الرائعة.",
         "shopNow": "تسوق الآن",
         "featuredTitle": "أزهارنا الجميلة"
     },
@@ -107,9 +107,11 @@
     },
     "Admin": {
         "title": "لوحة الإدارة",
+        "success": "نجاح",
         "all": "الكل",
         "orders": "الطلبات",
         "newOrders": "طلبات جديدة",
+        "copied": "تم نسخ العنوان!",
         "unreadMessages": "رسائل جديدة",
         "unreadQuestions": "أسئلة غير مقروءة",
         "products": "المنتجات",
@@ -123,6 +125,7 @@
             "user": "المستخدم",
             "total": "الإجمالي",
             "status": "الحالة",
+            "receipt": "إيصال الدفع",
             "messages": "الرسائل",
             "actions": "إجراءات"
         },
@@ -225,6 +228,23 @@
             "replySent": "تم إرسال الرد!",
             "replyFailed": "فشل إرسال الرد",
             "replyError": "خطأ في إرسال الرد"
+        },
+        "settings": "الإعدادات",
+        "settingsUpdated": "تم تحديث الإعدادات بنجاح",
+        "settingsUpdateFailed": "فشل تحديث الإعدادات",
+        "whatsappButtonTitle": "زر الواتساب (للجوال)",
+        "showFloatingButton": "إظهار الزر العائم",
+        "whatsappDesc": "تفعيل زر الواتساب العائم على الأجهزة المحمولة.",
+        "announcement": {
+            "title": "إعدادات شريط الإعلانات",
+            "enable": "تفعيل شريط الإعلانات",
+            "enableDesc": "عرض شريط إعلانات متحرك أسفل شريط التنقل.",
+            "textTr": "نص الإعلان (TR)",
+            "textEn": "نص الإعلان (EN)",
+            "textAr": "نص الإعلان (AR)",
+            "bgColor": "لون الخلفية",
+            "textColor": "لون النص",
+            "save": "حفظ إعدادات الإعلان"
         }
     },
     "FlowerTypes": {
@@ -359,7 +379,8 @@
         "confirmOrder": "تأكيد الدفع وتقديم الطلب",
         "errorMissingFile": "يرجى رفع إيصال الدفع.",
         "errorMissingMtcn": "يرجى رفع إيصال MTCN.",
-        "copied": "تم النسخ إلى الحافظة!"
+        "copied": "تم النسخ إلى الحافظة!",
+        "missingInfoWarning": "يرجى إكمال عنوانك ومعلومات الاتصال للمتابعة في طلبك."
     },
     "Success": {
         "title": "شكرا لك على طلبك!",

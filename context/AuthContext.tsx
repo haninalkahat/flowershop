@@ -8,6 +8,8 @@ interface User {
     fullName: string;
     email: string;
     phoneNumber: string;
+    address: string;
+    city: string;
 }
 
 interface AuthContextType {

@@ -107,9 +107,11 @@
     },
     "Admin": {
         "title": "Yönetici Paneli",
+        "success": "Başarılı",
         "all": "Tümü",
         "orders": "Siparişler",
         "newOrders": "Yeni Siparişler",
+        "copied": "Adres kopyalandı!",
         "unreadMessages": "Okunmamış Mesajlar",
         "unreadQuestions": "Okunmamış Sorular",
         "products": "Ürünler",
@@ -123,6 +125,7 @@
             "user": "Kullanıcı",
             "total": "Tutar",
             "status": "Durum",
+            "receipt": "Ödeme Dekontu",
             "messages": "Mesajlar",
             "actions": "İşlemler"
         },
@@ -225,6 +228,23 @@
             "replySent": "Yanıt gönderildi!",
             "replyFailed": "Yanıt gönderilemedi",
             "replyError": "Yanıt gönderilirken hata oluştu"
+        },
+        "settings": "Ayarlar",
+        "settingsUpdated": "Ayarlar başarıyla güncellendi",
+        "settingsUpdateFailed": "Ayarlar güncellenemedi",
+        "whatsappButtonTitle": "WhatsApp Butonu (Mobil)",
+        "showFloatingButton": "Yüzen Butonu Göster",
+        "whatsappDesc": "Mobil cihazlarda yüzen WhatsApp iletişim butonunu etkinleştirin.",
+        "announcement": {
+            "title": "Duyuru Barı Ayarları",
+            "enable": "Duyuru Barını Etkinleştir",
+            "enableDesc": "Navigasyon altında kayan bir duyuru barı gösterin.",
+            "textTr": "Duyuru Metni (TR)",
+            "textEn": "Duyuru Metni (EN)",
+            "textAr": "Duyuru Metni (AR)",
+            "bgColor": "Arkaplan Rengi",
+            "textColor": "Yazı Rengi",
+            "save": "Ayarları Kaydet"
         }
     },
     "FlowerTypes": {
@@ -359,7 +379,8 @@
         "confirmOrder": "Ödemeyi Onayla ve Sipariş Ver",
         "errorMissingFile": "Lütfen ödeme dekontunu yükleyin.",
         "errorMissingMtcn": "Lütfen MTCN makbuzunu yükleyin.",
-        "copied": "Panoya kopyalandı!"
+        "copied": "Panoya kopyalandı!",
+        "missingInfoWarning": "Siparişinize devam etmek için lütfen adres ve iletişim bilgilerinizi tamamlayın."
     },
     "Success": {
         "title": "Siparişiniz için teşekkür ederiz!",

@@ -41,6 +41,20 @@ export async function POST(req: Request) {
         const freshness = formData.get('freshness') as string;
         const height = formData.get('height') as string;
 
+        // Handle Video Upload
+        const videoFile = formData.get('video') as File;
+        let videoUrl = null;
+        if (videoFile && videoFile.size > 0) {
+            const buffer = Buffer.from(await videoFile.arrayBuffer());
+            const filename = `video-${Date.now()}-${videoFile.name.replace(/[^a-z0-9.]/gi, '_')}`;
+            const publicPath = path.join(process.cwd(), 'public', 'uploads');
+            if (!fs.existsSync(publicPath)) {
+                fs.mkdirSync(publicPath, { recursive: true });
+            }
+            fs.writeFileSync(path.join(publicPath, filename), buffer);
+            videoUrl = `/uploads/${filename}`;
+        }
+
         // Handle Multiple Main Images (Up to 4)
         const mainImageUrls: string[] = [];
         for (let i = 0; i < 4; i++) {
@@ -78,7 +92,8 @@ export async function POST(req: Request) {
                 origin,
                 freshness,
                 height,
-                images: mainImageUrls, // New Array Field
+                images: mainImageUrls,
+                videoUrl,
                 isFeatured: formData.get('isFeatured') === 'true',
             }
         });

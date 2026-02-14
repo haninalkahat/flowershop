@@ -3,18 +3,21 @@
 
 import React, { useState } from 'react';
 import { useCart } from '@/context/CartContext';
-import { useCurrency } from '@/context/CurrencyContext'; // Added
+import { useAuth } from '@/context/AuthContext'; // Added
+import { useCurrency } from '@/context/CurrencyContext';
 import { useRouter } from '@/i18n/navigation';
 import { Copy, Upload, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { Link } from '@/i18n/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 export default function CheckoutPage() {
+    const { user, loading: authLoading, checkAuth } = useAuth(); // Added
     const { cart, getTotalPrice, clearCart } = useCart();
     const { formatPrice } = useCurrency(); // Added
     const router = useRouter();
     const t = useTranslations('Checkout');
+    const locale = useLocale();
     const [paymentMethod, setPaymentMethod] = useState<'BANK_TRANSFER' | 'WESTERN_UNION'>('BANK_TRANSFER');
     const [uploading, setUploading] = useState(false);
     const [receiptFile, setReceiptFile] = useState<File | null>(null);
@@ -43,6 +46,16 @@ export default function CheckoutPage() {
         }
     };
 
+    // Check for user info
+    React.useEffect(() => {
+        if (!authLoading && user) {
+            if (!user.address || !user.phoneNumber || !user.fullName) {
+                toast.error(t('missingInfoWarning'));
+                router.push('/profile?redirect=checkout');
+            }
+        }
+    }, [user, authLoading, router, t, checkAuth]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!receiptFile) {
@@ -59,6 +72,7 @@ export default function CheckoutPage() {
             formData.append('file', receiptFile);
             formData.append('items', JSON.stringify(cart)); // Send cart items as fallback
             formData.append('paymentMethod', paymentMethod);
+            formData.append('locale', locale);
 
             // Note: We don't need to pass cart items manually if the backend fetches from DB cart.
             // But if we did, we'd JSON.stringify them into a field. 

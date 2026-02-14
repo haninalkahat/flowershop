@@ -233,7 +233,16 @@ function ProfileContent() {
             if (res.ok) {
                 setProfileStatus('Profile updated successfully!');
                 await checkAuth(); // Refresh context
-                setTimeout(() => setProfileStatus(''), 3000);
+
+                // Smart Redirect Logic
+                const redirectPath = searchParams.get('redirect');
+                if (redirectPath === 'checkout') {
+                    setTimeout(() => {
+                        router.push('/checkout');
+                    }, 1000);
+                } else {
+                    setTimeout(() => setProfileStatus(''), 3000);
+                }
             } else {
                 setProfileStatus('Failed to update profile.');
             }

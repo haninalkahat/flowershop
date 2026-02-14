@@ -18,6 +18,7 @@ model Product {
   description_en String?
   description_ar String?
   images        String[]   // Array of 4 images
+  videoUrl      String?    // Optional video URL
   originalPrice Decimal
   discountPrice Decimal?
   flowerType    String     @default("Mixed")
@@ -131,6 +132,7 @@ model Order {
   updatedAt   DateTime       @updatedAt
   messages    OrderMessage[]
   isNewOrder  Boolean        @default(true)
+  locale      String         @default("en")
 }
 
 enum PaymentMethod {
@@ -195,4 +197,11 @@ model Review {
   rating    Int
   comment   String?
   createdAt DateTime @default(now())
+}
+
+model Setting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
 }

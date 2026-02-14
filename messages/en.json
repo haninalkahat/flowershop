@@ -107,9 +107,11 @@
     },
     "Admin": {
         "title": "Admin Panel",
+        "success": "Success",
         "all": "All",
         "orders": "Orders",
         "newOrders": "New Orders",
+        "copied": "Address copied!",
         "unreadMessages": "Unread Messages",
         "unreadQuestions": "Unread Questions",
         "products": "Products",
@@ -123,6 +125,7 @@
             "user": "User",
             "total": "Total",
             "status": "Status",
+            "receipt": "Payment Receipt",
             "messages": "Messages",
             "actions": "Actions"
         },
@@ -225,6 +228,23 @@
             "replySent": "Reply sent!",
             "replyFailed": "Failed to send reply",
             "replyError": "Error sending reply"
+        },
+        "settings": "Settings",
+        "settingsUpdated": "Settings updated successfully",
+        "settingsUpdateFailed": "Failed to update settings",
+        "whatsappButtonTitle": "WhatsApp Button (Mobile)",
+        "showFloatingButton": "Show floating button",
+        "whatsappDesc": "Enable a floating WhatsApp contact button on mobile devices.",
+        "announcement": {
+            "title": "Announcement Bar Settings",
+            "enable": "Enable Announcement Bar",
+            "enableDesc": "Show a scrolling announcement bar below the navbar.",
+            "textTr": "Announcement Text (TR)",
+            "textEn": "Announcement Text (EN)",
+            "textAr": "Announcement Text (AR)",
+            "bgColor": "Background Color",
+            "textColor": "Text Color",
+            "save": "Save Announcement Settings"
         }
     },
     "FlowerTypes": {
@@ -359,7 +379,8 @@
         "confirmOrder": "Confirm Payment & Place Order",
         "errorMissingFile": "Please upload a payment receipt.",
         "errorMissingMtcn": "Please upload the MTCN receipt.",
-        "copied": "Copied to clipboard!"
+        "copied": "Copied to clipboard!",
+        "missingInfoWarning": "Please complete your address and contact information to continue with your order."
     },
     "Success": {
         "title": "Thank you for your order!",

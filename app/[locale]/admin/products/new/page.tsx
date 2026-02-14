@@ -30,6 +30,7 @@ export default function NewProductPage() {
     });
 
     const [mainImages, setMainImages] = useState<File[]>([]);
+    const [videoFile, setVideoFile] = useState<File | null>(null);
 
     // Variants State
     const [variants, setVariants] = useState<any[]>([]);
@@ -82,6 +83,10 @@ export default function NewProductPage() {
         mainImages.forEach((file, index) => {
             data.append(`images_${index}`, file);
         });
+
+        if (videoFile) {
+            data.append('video', videoFile);
+        }
 
         // Prepare variants metadata (excluding file objects which go separate)
         const variantsMeta = variants.map(v => ({
@@ -322,6 +327,41 @@ export default function NewProductPage() {
                                 )}
                             </div>
                         ))}
+                    </div>
+                </div>
+
+                {/* Product Video */}
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
+                    <h2 className="text-xl font-semibold text-gray-700 border-b pb-2 text-left rtl:text-right">Product Video (Optional)</h2>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:bg-gray-50 transition-colors flex flex-col items-center justify-center relative">
+                        {videoFile ? (
+                            <>
+                                <video src={URL.createObjectURL(videoFile)} className="max-h-60 rounded mb-4" controls />
+                                <button
+                                    type="button"
+                                    onClick={() => setVideoFile(null)}
+                                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 shadow-sm hover:scale-110 transition-transform"
+                                >
+                                    <X size={18} />
+                                </button>
+                                <span className="text-sm text-gray-600">{videoFile.name}</span>
+                            </>
+                        ) : (
+                            <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-pink-500">
+                                <Upload size={32} className="mb-2" />
+                                <span className="text-sm font-medium">Click to upload video (MP4, MOV)</span>
+                                <input
+                                    type="file"
+                                    className="hidden"
+                                    accept="video/mp4,video/quicktime"
+                                    onChange={(e) => {
+                                        if (e.target.files && e.target.files[0]) {
+                                            setVideoFile(e.target.files[0]);
+                                        }
+                                    }}
+                                />
+                            </label>
+                        )}
                     </div>
                 </div>
 

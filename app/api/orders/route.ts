@@ -113,6 +113,8 @@ export async function POST(request: Request) {
 
         const paymentMethod = (formData.get('paymentMethod') as string) || 'BANK_TRANSFER';
 
+        const locale = (formData.get('locale') as string) || 'en';
+
         const order = await prisma.$transaction(async (tx) => {
             // 1. Create Order
             const newOrder = await tx.order.create({
@@ -121,6 +123,7 @@ export async function POST(request: Request) {
                     totalAmount,
                     status: 'AWAITING_PAYMENT',
                     paymentMethod: paymentMethod === 'WESTERN_UNION' ? 'WESTERN_UNION' : 'BANK_TRANSFER',
+                    locale,
                     items: {
                         create: orderItems.map(item => ({
                             productId: item.productId,

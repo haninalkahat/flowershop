@@ -18,6 +18,9 @@ async function getUser() {
     }
 }
 
+import { sendEmail } from '@/lib/email';
+import { getOrderStatusEmail } from '@/lib/email-templates';
+
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const userId = await getUser();
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -36,13 +39,32 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     try {
-        await prisma.order.update({
+        const order = await prisma.order.update({
             where: { id },
             data: {
                 status,
                 isNewOrder: false
+            },
+            include: {
+                user: true
             }
         });
+
+        // Send Email Notification
+        if (order.user.email) {
+            try {
+                const { subject, html } = getOrderStatusEmail(
+                    order.locale || 'en',
+                    order.id,
+                    order.status,
+                    order.user.fullName
+                );
+                await sendEmail(order.user.email, subject, html);
+            } catch (emailError) {
+                console.error('Failed to send status email:', emailError);
+                // Continue execution, do not fail the request
+            }
+        }
 
         return NextResponse.json({ success: true, status });
     } catch (error) {

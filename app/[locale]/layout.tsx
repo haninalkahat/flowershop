@@ -3,6 +3,9 @@ import type { Metadata } from 'next';
 import { Inter, Playfair_Display, Cairo } from 'next/font/google';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import AnnouncementBar from '@/components/AnnouncementBar';
+
+import WhatsAppButton from '@/components/WhatsAppButton';
 import { WishlistProvider } from '@/context/WishlistContext';
 import { CartProvider } from '@/context/CartContext';
 import { AuthProvider } from '@/context/AuthContext';
@@ -39,7 +42,7 @@ export default async function RootLayout({
   const messages = await getMessages();
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
   // Include font variables based on locale to prevent "preloaded but not used" warning
-  const fonts = `${inter.variable} ${playfair.variable} ${locale === 'ar' ? cairo.variable + ' ' + cairo.className : 'font-sans'}`;
+  const fonts = `${inter.variable} ${playfair.variable} ${cairo.variable} ${locale === 'ar' ? cairo.className : 'font-sans'}`;
 
   return (
     <html lang={locale} dir={dir}>
@@ -81,8 +84,10 @@ export default async function RootLayout({
                     }}
                   />
                   <Navbar />
+                  <AnnouncementBar />
                   {children}
                   <Footer />
+                  <WhatsAppButton />
                 </WishlistProvider>
               </CurrencyProvider>
             </CartProvider>

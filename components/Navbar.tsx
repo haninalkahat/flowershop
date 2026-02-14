@@ -77,16 +77,112 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-pink-100 transition-colors duration-300">
-      <div className="container mx-auto px-4 md:px-6 py-4 flex justify-between items-center">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
+      <div className="container mx-auto pl-0 pr-2 md:px-6 py-4 flex justify-between items-center relative">
+
+        {/* MOBILE LEFT: Hamburger & Settings */}
+        <div className="md:hidden flex items-center gap-0.5">
+          <button onClick={() => setIsOpen(!isOpen)} className="text-gray-600 hover:text-pink-600 focus:outline-none p-1">
+            {isOpen ? (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            ) : (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            )}
+          </button>
+
+          {/* Mobile Lang Switcher */}
+          <div className="relative" ref={mobileLangDropdownRef}>
+            <button
+              onClick={() => setShowMobileLangDropdown(!showMobileLangDropdown)}
+              className="flex items-center gap-1 text-gray-500 hover:text-pink-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+            >
+              <Globe className="w-5 h-5" />
+            </button>
+            {showMobileLangDropdown && (
+              <div className="absolute mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-100 py-2 animate-fade-in z-50 top-full left-0">
+                <button
+                  onClick={() => { switchLocale('tr'); setShowMobileLangDropdown(false); }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200 flex items-center justify-between group"
+                >
+                  <span>Türkçe</span>
+                  {locale === 'tr' && <Check className="w-4 h-4 text-pink-600" />}
+                </button>
+                <button
+                  onClick={() => { switchLocale('en'); setShowMobileLangDropdown(false); }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200 flex items-center justify-between group"
+                >
+                  <span>English</span>
+                  {locale === 'en' && <Check className="w-4 h-4 text-pink-600" />}
+                </button>
+                <button
+                  onClick={() => { switchLocale('ar'); setShowMobileLangDropdown(false); }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200 flex items-center justify-between group"
+                >
+                  <span>العربية</span>
+                  {locale === 'ar' && <Check className="w-4 h-4 text-pink-600" />}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Currency Switcher */}
+          <div className="relative" ref={mobileCurrencyDropdownRef}>
+            <button
+              onClick={() => setShowMobileCurrencyDropdown(!showMobileCurrencyDropdown)}
+              className="flex items-center gap-1 text-gray-500 hover:text-pink-600 transition-colors p-1 rounded-full hover:bg-gray-100 font-medium text-xs"
+            >
+              {currency}
+            </button>
+            {showMobileCurrencyDropdown && (
+              <div className="absolute mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-100 py-2 animate-fade-in z-50 top-full left-0">
+                {['USD', 'TRY', 'SAR'].map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => { setCurrency(c as Currency); setShowMobileCurrencyDropdown(false); }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200 flex items-center justify-between group"
+                  >
+                    <span>{c}</span>
+                    {currency === c && <Check className="w-4 h-4 text-pink-600" />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* MOBILE CENTER: Title */}
+        <div className="md:hidden absolute left-1/2 transform -translate-x-1/2">
+          <Link href="/" className="font-serif text-xl font-bold text-gray-900 tracking-wide">Flowershop</Link>
+        </div>
+
+        {/* MOBILE RIGHT: User & Cart */}
+        <div className="md:hidden flex items-center gap-3">
+          <Link href={user ? "/profile" : "/login"} className="text-gray-600 hover:text-pink-600 p-1">
+            <User className="w-6 h-6" />
+          </Link>
+
+          <Link
+            href="/cart"
+            className={`relative text-gray-600 hover:text-pink-600 p-1 transition-all duration-300 transform ${animateCart ? 'scale-125 text-pink-700' : 'scale-100'}`}
+          >
+            <ShoppingCart className="w-6 h-6" />
+            {mounted && getTotalItems() > 0 && (
+              <span className="absolute -top-1 -right-1 bg-pink-600 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center border-2 border-white">
+                {getTotalItems()}
+              </span>
+            )}
+          </Link>
+        </div>
+
+
+        {/* DESKTOP: Logo (Left) */}
+        <Link href="/" className="hidden md:flex items-center gap-2 group">
           <div className="bg-pink-50 p-1.5 md:p-2 rounded-full group-hover:bg-pink-100 transition-colors duration-300">
             <Flower className="w-4 h-4 md:w-6 md:h-6 text-pink-600" />
           </div>
           <span className="font-serif text-lg md:text-2xl font-bold text-gray-900 tracking-wide">Flowershop</span>
         </Link>
 
-        {/* Desktop Menu */}
+        {/* DESKTOP MENU (Center) */}
         <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
           <Link href="/" className="text-gray-600 hover:text-pink-600 font-medium transition-colors duration-200">
             {t('home')}
@@ -229,78 +325,6 @@ export default function Navbar() {
             </Link>
           </div>
         </div>
-
-        {/* Mobile Menu Button */}
-        <div className="md:hidden flex items-center gap-2">
-          {/* Mobile Currency Switcher */}
-          <div className="relative" ref={mobileCurrencyDropdownRef}>
-            <button
-              onClick={() => setShowMobileCurrencyDropdown(!showMobileCurrencyDropdown)}
-              className="flex items-center gap-1 text-gray-500 hover:text-pink-600 transition-colors p-1 rounded-full hover:bg-gray-100 font-medium text-[10px]"
-            >
-              {currency}
-            </button>
-
-            {showMobileCurrencyDropdown && (
-              <div className={`absolute mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-100 py-2 animate-fade-in z-50 top-full ${locale === 'ar' ? 'left-0' : 'right-0'}`}>
-                {['USD', 'TRY', 'SAR'].map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => { setCurrency(c as Currency); setShowMobileCurrencyDropdown(false); }}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200 flex items-center justify-between group"
-                  >
-                    <span>{c}</span>
-                    {currency === c && <Check className="w-4 h-4 text-pink-600" />}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Lang Switcher */}
-          <div className="relative" ref={mobileLangDropdownRef}>
-            <button
-              onClick={() => setShowMobileLangDropdown(!showMobileLangDropdown)}
-              className="flex items-center gap-1 text-gray-500 hover:text-pink-600 transition-colors p-1 rounded-full hover:bg-gray-100"
-            >
-              <Globe className="w-4 h-4" />
-            </button>
-
-            {showMobileLangDropdown && (
-              <div className={`absolute mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-100 py-2 animate-fade-in z-50 top-full ${locale === 'ar' ? 'left-0' : 'right-0'}`}>
-                <button
-                  onClick={() => { switchLocale('tr'); setShowMobileLangDropdown(false); }}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200 flex items-center justify-between group"
-                >
-                  <span>Türkçe</span>
-                  {locale === 'tr' && <Check className="w-4 h-4 text-pink-600" />}
-                </button>
-                <button
-                  onClick={() => { switchLocale('en'); setShowMobileLangDropdown(false); }}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200 flex items-center justify-between group"
-                >
-                  <span>English</span>
-                  {locale === 'en' && <Check className="w-4 h-4 text-pink-600" />}
-                </button>
-                <button
-                  onClick={() => { switchLocale('ar'); setShowMobileLangDropdown(false); }}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200 flex items-center justify-between group"
-                >
-                  <span>العربية</span>
-                  {locale === 'ar' && <Check className="w-4 h-4 text-pink-600" />}
-                </button>
-              </div>
-            )}
-          </div>
-
-          <button onClick={() => setIsOpen(!isOpen)} className="text-gray-600 hover:text-pink-600 focus:outline-none">
-            {isOpen ? (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            ) : (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            )}
-          </button>
-        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -311,13 +335,11 @@ export default function Navbar() {
           <Link href="/about" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>{t('about')}</Link>
           <Link href="/contact" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>{t('contact')}</Link>
           <Link href="/wishlist" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>Wishlist</Link>
-          <Link href="/cart" className="block text-gray-600 hover:text-pink-600 py-2" onClick={() => setIsOpen(false)}>
-            {t('cart')} ({getTotalItems()})
-          </Link>
+
           {user ? (
             <div className="pt-2 border-t border-gray-100 flex flex-col space-y-2">
               <span className="block text-gray-700 font-medium px-2">{user.fullName}</span>
-              <Link href="/profile" className="block text-gray-600 hover:text-pink-600 py-2 px-2" onClick={() => setIsOpen(false)}>{t('profile')}</Link>
+              {/* Profile and Cart removed as requested */}
               {user.email === 'llaffashopstore@gmail.com' && (
                 <Link href="/admin/orders" className="block text-gray-600 hover:text-pink-600 py-2 px-2" onClick={() => setIsOpen(false)}>{t('adminPanel')}</Link>
               )}

@@ -1,17 +1,19 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
-import { useCurrency } from '@/context/CurrencyContext'; // Added
-import { ArrowLeft, Minus, Plus, ShoppingCart, Star, Loader2, Heart } from 'lucide-react';
+import { useCurrency } from '@/context/CurrencyContext';
+import { ArrowLeft, Minus, Plus, ShoppingCart, Star, Loader2, Heart, Play, Share2, Copy, MessageCircle } from 'lucide-react';
 import { useWishlist } from '@/context/WishlistContext';
 import { toast } from 'react-hot-toast';
 import ProductQuestions from '@/components/ProductQuestions';
 import ProductReviews from '@/components/ProductReviews';
+
+
 
 export default function ProductDetailClient({ product, initialColor }: { product: any, initialColor?: string }) {
     const t = useTranslations('Product');
@@ -64,9 +66,8 @@ export default function ProductDetailClient({ product, initialColor }: { product
 
     const [selectedColor, setSelectedColor] = useState<string>(getInitialColor());
 
-    // Initial image logic based on selectedColor
-    const getInitialImages = () => {
-        const color = getInitialColor();
+    // Helper to get raw images list based on color
+    const getRawImages = (color: string) => {
         if (hasVariants) {
             const variant = product.variants.find((v: any) => v.colorName === color);
             // Check if variant has specific images, else fallback to product images
@@ -76,8 +77,17 @@ export default function ProductDetailClient({ product, initialColor }: { product
         return product.images && product.images.length > 0 ? product.images : [product.imageUrl];
     };
 
+    // Helper to combine images with video
+    const getMediaList = (images: string[]) => {
+        const list = [...images];
+        if (product.videoUrl) {
+            list.push(product.videoUrl);
+        }
+        return list;
+    };
+
     // State for the currently displayed images list (based on variant)
-    const [currentImages, setCurrentImages] = useState<string[]>(getInitialImages());
+    const [currentImages, setCurrentImages] = useState<string[]>(getMediaList(getRawImages(selectedColor)));
     // State for the main large image being viewed
     const [mainImage, setMainImage] = useState<string>(currentImages[0]);
 
@@ -100,25 +110,12 @@ export default function ProductDetailClient({ product, initialColor }: { product
 
     useEffect(() => {
         // When selectedColor changes, update images
-        const color = selectedColor;
-        let newImages: string[] = [];
+        const rawImages = getRawImages(selectedColor);
+        const mediaList = getMediaList(rawImages);
 
-        if (hasVariants) {
-            const variant = product.variants.find((v: any) => v.colorName === color);
-            if (variant) {
-                if (variant.images && variant.images.length > 0) newImages = variant.images;
-                else if (variant.imageUrl) newImages = [variant.imageUrl];
-                else newImages = product.images || [product.imageUrl];
-            } else {
-                newImages = product.images || [product.imageUrl];
-            }
-        } else {
-            newImages = product.images || [product.imageUrl];
-        }
-
-        setCurrentImages(newImages);
-        setMainImage(newImages[0]);
-    }, [selectedColor, product, hasVariants]); // Added hasVariants to dependency array for completeness
+        setCurrentImages(mediaList);
+        setMainImage(mediaList[0]);
+    }, [selectedColor, product, hasVariants]);
 
 
     // Check if main image should be the default fallback if "Original" is selected?
@@ -160,6 +157,51 @@ export default function ProductDetailClient({ product, initialColor }: { product
 
     const [loading, setLoading] = useState(false);
 
+    const [showShareMenu, setShowShareMenu] = useState(false);
+    const shareMenuRef = useRef<HTMLDivElement>(null);
+
+    // Close share menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (shareMenuRef.current && !shareMenuRef.current.contains(event.target as Node)) {
+                setShowShareMenu(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const handleShare = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: displayName,
+                    text: `Check out this beautiful flower: ${displayName}`,
+                    url: window.location.href,
+                });
+            } catch (error) {
+                // Should we show fallback if share fails/cancels? Only if it's not AbortError
+                if ((error as Error).name !== 'AbortError') {
+                    setShowShareMenu(!showShareMenu);
+                }
+            }
+        } else {
+            setShowShareMenu(!showShareMenu);
+        }
+    };
+
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copied!', { icon: '🔗' });
+        setShowShareMenu(false);
+    };
+
+    const shareWhatsApp = () => {
+        const text = encodeURIComponent(`Look at this beautiful flower: ${displayName} - ${window.location.href}`);
+        window.open(`https://wa.me/?text=${text}`, '_blank');
+        setShowShareMenu(false);
+    };
+
     const handleAddToCart = async () => {
         if (loading) return;
         setLoading(true);
@@ -170,12 +212,12 @@ export default function ProductDetailClient({ product, initialColor }: { product
                 id: product.id,
                 name: displayName,
                 description: displayDescription,
-                imageUrl: mainImage,
+                imageUrl: mainImage === product.videoUrl ? currentImages[0] : mainImage, // Use first image if video is selected
                 // Override original price with current calculated price (variant or base)
                 originalPrice: currentPrice,
                 discountPrice: null, // Ensure discount is cleared when overriding
                 flowerType: product.flowerType,
-                images: currentImages,
+                images: currentImages.filter(img => img !== product.videoUrl), // Don't save video to cart images
                 selectedColor: selectedColor !== 'Original' ? selectedColor : undefined
             }, quantity);
 
@@ -216,14 +258,25 @@ export default function ProductDetailClient({ product, initialColor }: { product
                     <div className="space-y-4">
                         {/* Main Image */}
                         <div className="relative w-full aspect-square bg-[#F9F9F9] rounded-3xl overflow-hidden shadow-sm border border-gray-100/50 group">
-                            <Image
-                                src={mainImage || '/placeholder.jpg'}
-                                alt={displayName}
-                                fill
-                                priority
-                                className="object-contain p-6 group-hover:scale-105 transition-transform duration-700 ease-in-out"
-                                sizes="(max-width: 768px) 100vw, 50vw"
-                            />
+                            {mainImage === product.videoUrl ? (
+                                <video
+                                    src={mainImage}
+                                    controls
+                                    muted
+                                    loop
+                                    className="w-full h-full object-contain"
+                                />
+                            ) : (
+                                <Image
+                                    src={mainImage || '/placeholder.jpg'}
+                                    alt={displayName}
+                                    fill
+                                    priority
+                                    className="object-contain p-6 group-hover:scale-105 transition-transform duration-700 ease-in-out"
+                                    sizes="(max-width: 768px) 100vw, 50vw"
+                                />
+                            )}
+
                             <button
                                 onClick={toggleWishlist}
                                 className="absolute top-6 right-6 p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:scale-110 transition-all duration-300 z-10 group/btn"
@@ -249,7 +302,13 @@ export default function ProductDetailClient({ product, initialColor }: { product
                                         onClick={() => setMainImage(img)}
                                         className={`relative aspect-square rounded-xl overflow-hidden border-2 bg-[#F9F9F9] transition-all ${mainImage === img ? 'border-pink-500 ring-2 ring-pink-100' : 'border-transparent hover:border-gray-200'}`}
                                     >
-                                        <Image src={img} alt={`View ${idx}`} fill className="object-contain p-1" sizes="20vw" />
+                                        {img === product.videoUrl ? (
+                                            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-pink-500">
+                                                <Play size={24} fill="currentColor" />
+                                            </div>
+                                        ) : (
+                                            <Image src={img} alt={`View ${idx}`} fill className="object-contain p-1" sizes="20vw" />
+                                        )}
                                     </button>
                                 ))}
                             </div>
@@ -262,9 +321,41 @@ export default function ProductDetailClient({ product, initialColor }: { product
                             {/* @ts-ignore */}
                             {tTypes(product.flowerType.toLowerCase())}
                         </span>
-                        <h1 className="text-4xl md:text-5xl font-bold font-serif text-gray-900 mb-4 leading-tight">
-                            {displayName}
-                        </h1>
+
+                        <div className="flex items-start justify-between gap-4 mb-4">
+                            <h1 className="text-4xl md:text-5xl font-bold font-serif text-gray-900 leading-tight">
+                                {displayName}
+                            </h1>
+
+                            <div className="relative" ref={shareMenuRef}>
+                                <button
+                                    onClick={handleShare}
+                                    className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors"
+                                    aria-label="Share"
+                                >
+                                    <Share2 className="w-6 h-6" />
+                                </button>
+
+                                {showShareMenu && (
+                                    <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                                        <button
+                                            onClick={copyToClipboard}
+                                            className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-gray-50 text-gray-700 transition-colors border-b border-gray-50"
+                                        >
+                                            <Copy className="w-4 h-4" />
+                                            <span className="text-sm font-medium">Copy Link</span>
+                                        </button>
+                                        <button
+                                            onClick={shareWhatsApp}
+                                            className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-gray-50 text-gray-700 transition-colors"
+                                        >
+                                            <MessageCircle className="w-4 h-4 text-[#25D366]" />
+                                            <span className="text-sm font-medium">WhatsApp</span>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                         {/* Price & Rating */}
                         {/* Price & Rating */}
                         <div className="flex flex-wrap items-center gap-4 mb-6">
