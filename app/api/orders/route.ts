@@ -108,8 +108,34 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
         }
 
-        // Calculate total
-        const totalAmount = orderItems.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
+        // Calculate total items price
+        const itemsTotal = orderItems.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
+
+        // Calculate Shipping
+        let shippingCost = 0;
+        try {
+            // Fetch rates to ensure shipping logic matches frontend
+            const ratesRes = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+            const ratesData = ratesRes.ok ? await ratesRes.json() : null;
+            const rates = ratesData ? ratesData.rates : { TRY: 35.0 }; // Fallback
+
+            const tryRate = rates['TRY'] || 35.0;
+            const shippingFeeUSD = 200 / tryRate;
+            const freeShippingThresholdUSD = 1500 / tryRate;
+
+            if (itemsTotal < freeShippingThresholdUSD) {
+                shippingCost = shippingFeeUSD;
+            }
+        } catch (e) {
+            console.error("Failed to fetch rates for shipping calc, using fallback", e);
+            // Fallback calculation
+            const tryRate = 35.0;
+            if (itemsTotal < (1500 / tryRate)) {
+                shippingCost = 200 / tryRate;
+            }
+        }
+
+        const totalAmount = itemsTotal + shippingCost;
 
         const paymentMethod = (formData.get('paymentMethod') as string) || 'BANK_TRANSFER';
 

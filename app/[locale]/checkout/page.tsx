@@ -14,7 +14,7 @@ import { useTranslations, useLocale } from 'next-intl';
 export default function CheckoutPage() {
     const { user, loading: authLoading, checkAuth } = useAuth(); // Added
     const { cart, getTotalPrice, clearCart } = useCart();
-    const { formatPrice } = useCurrency(); // Added
+    const { formatPrice, rates } = useCurrency(); // Added rates
     const router = useRouter();
     const t = useTranslations('Checkout');
     const locale = useLocale();
@@ -150,9 +150,34 @@ export default function CheckoutPage() {
                             </div>
                         ))}
                     </div>
-                    <div className="border-t pt-4 flex justify-between font-bold text-lg">
-                        <span>{t('total')}</span>
-                        <span>{formatPrice(getTotalPrice())}</span>
+                    <div className="border-t pt-4 space-y-2">
+                        {/* Calculations */}
+                        {(() => {
+                            const totalUSD = getTotalPrice();
+                            const tryRate = rates['TRY'] || 35;
+                            const shippingCostUSD = 200 / tryRate;
+                            const freeShippingThresholdUSD = 1500 / tryRate;
+                            const isFreeShipping = totalUSD >= freeShippingThresholdUSD;
+                            const shippingDisplay = isFreeShipping ? t('free') : formatPrice(shippingCostUSD);
+                            const finalTotal = totalUSD + (isFreeShipping ? 0 : shippingCostUSD);
+
+                            return (
+                                <>
+                                    <div className="flex justify-between text-gray-600">
+                                        <span>{t('subtotal')}</span>
+                                        <span>{formatPrice(totalUSD)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-gray-600">
+                                        <span>{t('shipping')}</span>
+                                        <span className={isFreeShipping ? 'text-green-600 font-medium' : ''}>{shippingDisplay}</span>
+                                    </div>
+                                    <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2">
+                                        <span>{t('total')}</span>
+                                        <span>{formatPrice(finalTotal)}</span>
+                                    </div>
+                                </>
+                            );
+                        })()}
                     </div>
                 </div>
 

@@ -1,7 +1,6 @@
 
 import { NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
+import { uploadToCloudinary } from '@/lib/cloudinary';
 
 export async function POST(request: Request) {
     try {
@@ -16,23 +15,12 @@ export async function POST(request: Request) {
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
-        const filename = Date.now() + '_' + file.name.replaceAll(' ', '_');
 
-        // Ensure uploads directory exists
-        const uploadDir = path.join(process.cwd(), 'public/uploads');
-        try {
-            await mkdir(uploadDir, { recursive: true });
-        } catch (e) {
-            // Ignore if exists
-        }
+        // Determine type roughly from mime or just use auto
+        const type = file.type.startsWith('image') ? 'image' :
+            file.type.startsWith('video') ? 'video' : 'auto';
 
-        const filepath = path.join(uploadDir, filename);
-
-        await writeFile(filepath, buffer);
-
-        // Return the public URL
-        // existing public/uploads is accessible at /uploads
-        const url = `/uploads/${filename}`;
+        const url = await uploadToCloudinary(buffer, 'flowershop/uploads', type as any);
 
         return NextResponse.json({ url, success: true });
     } catch (error) {

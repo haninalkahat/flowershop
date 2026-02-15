@@ -103,7 +103,9 @@
         "name": "İsim",
         "price": "Fiyat",
         "quantity": "Adet",
-        "remove": "Kaldır"
+        "remove": "Kaldır",
+        "freeShippingMsg": "{amount} üzeri siparişlerde Kargo Bedava!",
+        "addMoreMsg": "Kargo bedava için {amount} daha ekleyin!"
     },
     "Admin": {
         "title": "Yönetici Paneli",
@@ -357,6 +359,9 @@
         "orderSummary": "Sipariş Özeti",
         "emptyCart": "Sepetiniz boş",
         "continueShopping": "Alışverişe Devam Et",
+        "free": "Ücretsiz",
+        "subtotal": "Ara Toplam",
+        "shipping": "Kargo",
         "orderPlaced": "Sipariş Başarıyla Alındı!",
         "redirecting": "Siparişlerinize yönlendiriliyorsunuz...",
         "total": "Toplam",

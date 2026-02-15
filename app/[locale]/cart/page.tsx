@@ -11,7 +11,7 @@ import { useTranslations, useLocale } from 'next-intl';
 export default function CartPage() {
   const { cart, updateCartItemQuantity, removeFromCart, getTotalPrice } = useCart();
   const { user } = useAuth();
-  const { formatPrice } = useCurrency(); // Added
+  const { formatPrice, rates } = useCurrency(); // Added rates
   const router = useRouter();
   const t = useTranslations('Cart');
   const locale = useLocale();
@@ -59,6 +59,34 @@ export default function CartPage() {
   return (
     <div className="min-h-screen container mx-auto px-4 py-12 pb-32 md:pb-12">
       <h1 className="text-4xl font-serif font-bold text-pink-700 mb-8 text-center">{t('title')}</h1>
+
+      {/* Shipping Incentive Message */}
+      {cart.length > 0 && (
+        <div className="mb-6 container mx-auto px-4">
+          {(() => {
+            const totalUSD = getTotalPrice();
+            const tryRate = rates['TRY'] || 35;
+            const freeShippingThresholdUSD = 1500 / tryRate;
+            const isFreeShipping = totalUSD >= freeShippingThresholdUSD;
+            const remainingUSD = freeShippingThresholdUSD - totalUSD;
+
+            if (isFreeShipping) {
+              return (
+                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-center font-medium">
+                  {t('freeShippingMsg', { amount: formatPrice(freeShippingThresholdUSD) })}
+                </div>
+              );
+            } else {
+              return (
+                <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg text-center font-medium">
+                  {t('addMoreMsg', { amount: formatPrice(remainingUSD) })}
+                </div>
+              );
+            }
+          })()}
+        </div>
+      )}
+
 
       <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-pink-100">
         <div className="hidden md:grid grid-cols-6 gap-4 p-4 bg-pink-50 border-b border-pink-100 font-semibold text-pink-800">
@@ -152,8 +180,36 @@ export default function CartPage() {
             {t('continueShopping')}
           </Link>
           <div className="flex flex-col items-center md:items-end w-full md:w-auto order-1 md:order-2">
-            <span className="text-lg text-gray-600 mb-2 text-center md:text-right w-full block">{t('subtotal')}</span>
-            <p className="text-3xl md:text-4xl font-bold text-pink-700 mb-6 text-center md:text-right w-full">{formatPrice(getTotalPrice())}</p>
+            <div className="w-full mb-6">
+              <div className="flex justify-between text-gray-600 mb-2">
+                <span>{t('subtotal')}</span>
+                <span>{formatPrice(getTotalPrice())}</span>
+              </div>
+
+              {/* Shipping Row */}
+              {(() => {
+                const totalUSD = getTotalPrice();
+                const tryRate = rates['TRY'] || 35;
+                const shippingCostUSD = 200 / tryRate;
+                const freeShippingThresholdUSD = 1500 / tryRate;
+                const isFreeShipping = totalUSD >= freeShippingThresholdUSD;
+                const shippingDisplay = isFreeShipping ? t('free') : formatPrice(shippingCostUSD);
+                const finalTotal = totalUSD + (isFreeShipping ? 0 : shippingCostUSD);
+
+                return (
+                  <>
+                    <div className="flex justify-between text-gray-600 mb-2 border-b pb-2">
+                      <span>{t('shipping')}</span>
+                      <span className={isFreeShipping ? 'text-green-600 font-medium' : ''}>{shippingDisplay}</span>
+                    </div>
+                    <div className="flex justify-between text-2xl md:text-3xl font-bold text-pink-700 mt-4">
+                      <span>{t('total')}</span>
+                      <span>{formatPrice(finalTotal)}</span>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
             <button
               onClick={handleCheckout}
               className="w-full md:w-auto bg-pink-600 text-white px-10 py-3 rounded-full font-bold hover:bg-pink-700 transition-all shadow-lg transform hover:-translate-y-1 active:scale-95 flex justify-center items-center"

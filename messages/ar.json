@@ -103,7 +103,9 @@
         "name": "الاسم",
         "price": "السعر",
         "quantity": "الكمية",
-        "remove": "إزالة"
+        "remove": "إزالة",
+        "freeShippingMsg": "شحن مجاني للطلبات التي تزيد عن {amount}!",
+        "addMoreMsg": "أضف {amount} للحصول على شحن مجاني!"
     },
     "Admin": {
         "title": "لوحة الإدارة",
@@ -357,6 +359,9 @@
         "orderSummary": "ملخص الطلب",
         "emptyCart": "سلتك فارغة",
         "continueShopping": "متابعة التسوق",
+        "free": "مجاني",
+        "subtotal": "المجموع الفرعي",
+        "shipping": "الشحن",
         "orderPlaced": "تم تقديم الطلب بنجاح!",
         "redirecting": "جاري التوجيه إلى طلباتك...",
         "total": "الإجمالي",

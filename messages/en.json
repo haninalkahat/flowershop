@@ -103,7 +103,9 @@
         "name": "Name",
         "price": "Price",
         "quantity": "Quantity",
-        "remove": "Remove"
+        "remove": "Remove",
+        "freeShippingMsg": "Orders over {amount} get Free Shipping!",
+        "addMoreMsg": "Add {amount} more to get Free Shipping!"
     },
     "Admin": {
         "title": "Admin Panel",
@@ -357,6 +359,9 @@
         "orderSummary": "Order Summary",
         "emptyCart": "Your cart is empty",
         "continueShopping": "Continue Shopping",
+        "free": "Free",
+        "subtotal": "Subtotal",
+        "shipping": "Shipping",
         "orderPlaced": "Order Placed Successfully!",
         "redirecting": "Redirecting to your orders...",
         "total": "Total",

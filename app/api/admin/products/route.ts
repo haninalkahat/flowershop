@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import fs from 'fs';
-import path from 'path';
-import { put } from '@vercel/blob';
+import { uploadToCloudinary } from '@/lib/cloudinary';
 
 export async function GET() {
     try {
@@ -42,32 +40,25 @@ export async function POST(req: Request) {
         const height = formData.get('height') as string;
 
         // Handle Video Upload
+        // Handle Video Upload
         const videoFile = formData.get('video') as File;
         let videoUrl = null;
         if (videoFile && videoFile.size > 0) {
             const buffer = Buffer.from(await videoFile.arrayBuffer());
-            const filename = `video-${Date.now()}-${videoFile.name.replace(/[^a-z0-9.]/gi, '_')}`;
-            const publicPath = path.join(process.cwd(), 'public', 'uploads');
-            if (!fs.existsSync(publicPath)) {
-                fs.mkdirSync(publicPath, { recursive: true });
-            }
-            fs.writeFileSync(path.join(publicPath, filename), buffer);
-            videoUrl = `/uploads/${filename}`;
+            // Upload to Cloudinary (resource_type: "video")
+            videoUrl = await uploadToCloudinary(buffer, 'flowershop/products', 'video');
         }
 
+        // Handle Multiple Main Images (Up to 4)
         // Handle Multiple Main Images (Up to 4)
         const mainImageUrls: string[] = [];
         for (let i = 0; i < 4; i++) {
             const imageFile = formData.get(`images_${i}`) as File;
             if (imageFile) {
                 const buffer = Buffer.from(await imageFile.arrayBuffer());
-                const filename = `product-${Date.now()}-${i}-${imageFile.name.replace(/[^a-z0-9.]/gi, '_')}`;
-                const publicPath = path.join(process.cwd(), 'public', 'uploads');
-                if (!fs.existsSync(publicPath)) {
-                    fs.mkdirSync(publicPath, { recursive: true });
-                }
-                fs.writeFileSync(path.join(publicPath, filename), buffer);
-                mainImageUrls.push(`/uploads/${filename}`);
+                // Upload to Cloudinary (resource_type: "image")
+                const url = await uploadToCloudinary(buffer, 'flowershop/products', 'image');
+                mainImageUrls.push(url);
             }
         }
 
@@ -103,15 +94,15 @@ export async function POST(req: Request) {
             const v = variantData[i];
 
             // Handle Multiple Variant Images
+            // Handle Multiple Variant Images
             const variantImageUrls: string[] = [];
             for (let j = 0; j < 4; j++) {
                 const vImageFile = formData.get(`variantImage_${v.tempId}_${j}`) as File;
                 if (vImageFile) {
                     const buffer = Buffer.from(await vImageFile.arrayBuffer());
-                    const filename = `variant-${Date.now()}-${v.tempId}-${j}-${vImageFile.name.replace(/[^a-z0-9.]/gi, '_')}`;
-                    const publicPath = path.join(process.cwd(), 'public', 'uploads');
-                    fs.writeFileSync(path.join(publicPath, filename), buffer);
-                    variantImageUrls.push(`/uploads/${filename}`);
+                    // Upload to Cloudinary
+                    const url = await uploadToCloudinary(buffer, 'flowershop/products', 'image');
+                    variantImageUrls.push(url);
                 }
             }
 
