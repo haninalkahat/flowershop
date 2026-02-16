@@ -38,10 +38,17 @@ export default async function Home() {
     }
 
     // Transform for UI (Decimal to Number)
+    // Transform for UI (Decimal to Number)
     products = productsToDisplay.map(p => ({
       id: p.id,
       name: p.name || '',
       description: p.description || null,
+      name_tr: p.name_tr,
+      name_en: p.name_en,
+      name_ar: p.name_ar,
+      description_tr: p.description_tr,
+      description_en: p.description_en,
+      description_ar: p.description_ar,
       images: p.images || [],
       imageUrl: p.images?.[0] || '', // Backwards compatibility
       originalPrice: Number(p.originalPrice),

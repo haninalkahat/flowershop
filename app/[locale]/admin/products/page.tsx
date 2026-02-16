@@ -19,7 +19,10 @@ export default function AdminProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch('/api/admin/products');
+      const res = await fetch('/api/admin/products', {
+        cache: 'no-store',
+        headers: { 'Pragma': 'no-cache' }
+      });
       if (res.ok) {
         const data = await res.json();
         setProducts(data);

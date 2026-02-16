@@ -185,6 +185,7 @@ export default function Navbar() {
               alt="Laffa Crochet Hook"
               fill
               className="object-contain"
+              sizes="(max-width: 768px) 56px, 80px"
             />
           </div>
           <div className="flex flex-col justify-center h-full">
