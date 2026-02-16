@@ -11,6 +11,7 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-inter)', 'sans-serif'],
         serif: ['var(--font-playfair)', 'serif'],
+        'arabic-title': ['"DecoType Thuluth"', 'var(--font-aref-ruqaa)', 'var(--font-amiri)', 'serif'],
       },
       colors: {
         primary: {
@@ -31,6 +32,18 @@ const config: Config = {
         lavender: '#B0E0E6',
         mint: '#C1E1C1',
         forest: '#6B8E23',
+        cream: {
+          50: '#FDFBF7',
+          100: '#FBF7EF',
+          200: '#F7EFDF',
+          300: '#F0DFBF',
+          400: '#E8CF9F',
+          500: '#E0BF7F',
+          600: '#D8AF5F',
+          700: '#C09040',
+          800: '#A07030',
+          900: '#805020',
+        },
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

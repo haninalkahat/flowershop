@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { Flower, ShoppingCart, User, ChevronDown, Heart, Globe, Check } from 'lucide-react';
 import { useState, useRef, useEffect, useTransition } from 'react';
@@ -77,7 +79,7 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-pink-100 transition-colors duration-300">
-      <div className="container mx-auto pl-0 pr-2 md:px-6 py-4 flex justify-between items-center relative">
+      <div className="container mx-auto pl-0 pr-2 md:px-6 py-2 flex justify-between items-center relative">
 
         {/* MOBILE LEFT: Hamburger & Settings */}
         <div className="md:hidden flex items-center gap-0.5">
@@ -149,9 +151,10 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* MOBILE CENTER: Title */}
         <div className="md:hidden absolute left-1/2 transform -translate-x-1/2">
-          <Link href="/" className="font-serif text-xl font-bold text-gray-900 tracking-wide">Flowershop</Link>
+          <Link href="/" className={`${locale === 'ar' ? 'font-arabic-title text-3xl font-normal' : 'font-serif text-2xl font-bold'} text-gray-900 tracking-wide`}>
+            {locale === 'ar' ? 'لفة خيط' : 'Laffa'}
+          </Link>
         </div>
 
         {/* MOBILE RIGHT: User & Cart */}
@@ -175,25 +178,34 @@ export default function Navbar() {
 
 
         {/* DESKTOP: Logo (Left) */}
-        <Link href="/" className="hidden md:flex items-center gap-2 group">
-          <div className="bg-pink-50 p-1.5 md:p-2 rounded-full group-hover:bg-pink-100 transition-colors duration-300">
-            <Flower className="w-4 h-4 md:w-6 md:h-6 text-pink-600" />
+        <Link href="/" className="hidden md:flex items-center gap-3 group">
+          <div className="relative w-14 h-14 md:w-20 md:h-20 transition-transform duration-300">
+            <Image
+              src="/hook.png"
+              alt="Laffa Crochet Hook"
+              fill
+              className="object-contain"
+            />
           </div>
-          <span className="font-serif text-lg md:text-2xl font-bold text-gray-900 tracking-wide">Flowershop</span>
+          <div className="flex flex-col justify-center h-full">
+            <span className={`${locale === 'ar' ? 'font-arabic-title text-4xl font-normal -mb-2' : 'font-serif text-3xl font-bold'} text-gray-900 tracking-wide leading-none`}>
+              {locale === 'ar' ? 'لفة خيط' : 'Laffa'}
+            </span>
+          </div>
         </Link>
 
         {/* DESKTOP MENU (Center) */}
         <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
-          <Link href="/" className="text-gray-600 hover:text-pink-600 font-medium transition-colors duration-200">
+          <Link href="/" className="text-gray-600 hover:text-pink-600 font-medium text-lg transition-colors duration-200">
             {t('home')}
           </Link>
-          <Link href="/about" className="text-gray-600 hover:text-pink-600 font-medium transition-colors duration-200">
+          <Link href="/about" className="text-gray-600 hover:text-pink-600 font-medium text-lg transition-colors duration-200">
             {t('about')}
           </Link>
-          <Link href="/shop" className="text-gray-600 hover:text-pink-600 font-medium transition-colors duration-200">
+          <Link href="/shop" className="text-gray-600 hover:text-pink-600 font-medium text-lg transition-colors duration-200">
             {t('shop')}
           </Link>
-          <Link href="/contact" className="text-gray-600 hover:text-pink-600 font-medium transition-colors duration-200">
+          <Link href="/contact" className="text-gray-600 hover:text-pink-600 font-medium text-lg transition-colors duration-200">
             {t('contact')}
           </Link>
 

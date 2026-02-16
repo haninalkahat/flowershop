@@ -65,7 +65,7 @@ export default async function Home() {
       {/* Hero Section */}
       <section
         className="relative h-[85vh] bg-cover bg-center flex items-center justify-center text-white overflow-hidden"
-        style={{ backgroundImage: "url('/hero-flowers.png')" }}
+        style={{ backgroundImage: "url('/hero-bg.jpeg')" }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60 z-0"></div>
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">

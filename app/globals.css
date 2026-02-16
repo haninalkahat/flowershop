@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+@font-face {
+  font-family: 'DecoType Thuluth';
+  src: url('/fonts/DecoTypeThuluth.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}

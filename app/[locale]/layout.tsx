@@ -1,6 +1,6 @@
 import '../globals.css';
 import type { Metadata } from 'next';
-import { Inter, Playfair_Display, Cairo } from 'next/font/google';
+import { Inter, Playfair_Display, Cairo, Rakkas, Katibeh, Amiri, Aref_Ruqaa } from 'next/font/google';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import AnnouncementBar from '@/components/AnnouncementBar';
@@ -18,6 +18,10 @@ import { notFound } from 'next/navigation';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair', display: 'swap' });
 const cairo = Cairo({ subsets: ['arabic'], variable: '--font-cairo', display: 'swap' });
+const rakkas = Rakkas({ weight: ['400'], subsets: ['arabic'], variable: '--font-rakkas', display: 'swap' });
+const katibeh = Katibeh({ weight: ['400'], subsets: ['arabic'], variable: '--font-katibeh', display: 'swap' });
+const amiri = Amiri({ weight: ['400', '700'], subsets: ['arabic'], variable: '--font-amiri', display: 'swap' });
+const arefRuqaa = Aref_Ruqaa({ weight: ['400', '700'], subsets: ['arabic'], variable: '--font-aref-ruqaa', display: 'swap' });
 
 export const metadata: Metadata = {
   title: 'Flowershop',
@@ -42,7 +46,7 @@ export default async function RootLayout({
   const messages = await getMessages();
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
   // Include font variables based on locale to prevent "preloaded but not used" warning
-  const fonts = `${inter.variable} ${playfair.variable} ${cairo.variable} ${locale === 'ar' ? cairo.className : 'font-sans'}`;
+  const fonts = `${inter.variable} ${playfair.variable} ${cairo.variable} ${rakkas.variable} ${katibeh.variable} ${amiri.variable} ${arefRuqaa.variable} ${locale === 'ar' ? cairo.className : 'font-sans'}`;
 
   return (
     <html lang={locale} dir={dir}>
