@@ -252,7 +252,7 @@
     "FlowerTypes": {
         "orchid": "Orchid",
         "tulip": "Tulip",
-        "sunflower": "SunFlower",
+        "sunflower": "Sunflower",
         "rose": "Rose",
         "mixed": "Mixed",
         "lily": "Lily",
@@ -261,7 +261,8 @@
         "pampas": "Pampas",
         "peony": "Peony",
         "calla lily": "Calla Lily",
-        "daffodil": "Daffodil"
+        "daffodil": "Daffodil",
+        "lily of the valley": "Lily of the Valley"
     },
     "Profile": {
         "profileDetails": "Profile Details",

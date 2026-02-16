@@ -192,7 +192,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
 
     const flowerTypes = [
-        "Rose", "Tulip", "Lily", "Orchid", "Mixed", "Hydrangea", "Carnation", "Pampas", "Peony", "Calla Lily", "Daffodil"
+        "Rose", "Tulip", "Lily", "Orchid", "Mixed", "Hydrangea", "Carnation", "Pampas", "Peony", "Calla Lily", "Daffodil", "Sunflower", "Daisy", "Lily of the Valley"
     ];
 
     if (loading) return <div className="p-10 text-center">{t('loading')}</div>;

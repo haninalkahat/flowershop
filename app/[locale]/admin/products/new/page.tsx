@@ -126,7 +126,7 @@ export default function NewProductPage() {
     };
 
     const flowerTypes = [
-        "Rose", "Tulip", "Lily", "Orchid", "Mixed", "Hydrangea", "Carnation", "Pampas", "Peony", "Calla Lily", "Daffodil"
+        "Rose", "Tulip", "Lily", "Orchid", "Mixed", "Hydrangea", "Carnation", "Pampas", "Peony", "Calla Lily", "Daffodil", "Sunflower", "Daisy", "Lily of the Valley"
     ];
 
     return (

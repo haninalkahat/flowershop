@@ -259,9 +259,10 @@
         "hydrangea": "هيدرانجيا",
         "carnation": "قرنفل",
         "pampas": "بامبز",
-        "peony": "عود الصليب",
+        "peony": "عود",
         "calla lily": "زنبق الكالا",
-        "daffodil": "نرجس"
+        "daffodil": "نرجس",
+        "lily of the valley": "زهرة الوادي"
     },
     "Profile": {
         "profileDetails": "تفاصيل الملف الشخصي",
