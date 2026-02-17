@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { uploadToCloudinary } from '@/lib/cloudinary';
-import fs from 'fs';
-import path from 'path';
+
+
 
 export async function GET() {
     try {
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
             flowerType: formData.get('flowerType') as string,
             variantsRaw: formData.get('variants') as string
         };
-        fs.appendFileSync(path.join(process.cwd(), 'debug_log.txt'), JSON.stringify(logData, null, 2) + '\n\n');
+        console.log('Product Creation Request:', JSON.stringify(logData, null, 2));
         const name = formData.get('name') as string;
         const description = formData.get('description') as string;
         // Localized fields
@@ -141,16 +141,6 @@ export async function POST(req: Request) {
 
     } catch (error: any) {
         console.error('Create Product Error:', error);
-
-        // Log error to file
-        const errorLogPath = path.join(process.cwd(), 'error_log.txt');
-        const errorDetails = `
-Time: ${new Date().toISOString()}
-Error: ${error.message}
-Stack: ${error.stack}
-----------------------------------------
-`;
-        fs.appendFileSync(errorLogPath, errorDetails);
 
         return NextResponse.json({ error: error.message, stack: error.stack }, { status: 500 });
     }
