@@ -26,3 +26,6 @@ prisma/client
 /lib/generated/prisma
 
 /lib/generated/prisma
+
+debug_log.txt
+error_log.txt
