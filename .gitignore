@@ -5,6 +5,7 @@
 .vercel
 .output
 node_modules
+.env.comparison
 
 # next.js build output
 .next/
