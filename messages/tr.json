@@ -176,7 +176,8 @@
             "pampas": "Pampas",
             "peony": "Şakayık",
             "calla lily": "Gala Çiçeği",
-            "daffodil": "Nergis"
+            "daffodil": "Nergis",
+            "bouquet": "Buket"
         },
         "form": {
             "addNewProduct": "Yeni Ürün Ekle",
@@ -263,7 +264,8 @@
         "calla lily": "Gala Çiçeği",
         "daffodil": "Nergis",
         "daisy": "Papatya",
-        "lily of the valley": "Müge (İnci Çiçeği)"
+        "lily of the valley": "Müge (İnci Çiçeği)",
+        "bouquet": "Buket"
     },
     "Profile": {
         "profileDetails": "Profil Detayları",

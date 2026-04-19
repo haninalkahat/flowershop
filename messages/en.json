@@ -176,7 +176,8 @@
             "pampas": "Pampas",
             "peony": "Peony",
             "calla lily": "Calla Lily",
-            "daffodil": "Daffodil"
+            "daffodil": "Daffodil",
+            "bouquet": "Bouquet"
         },
         "form": {
             "addNewProduct": "Add New Product",
@@ -263,7 +264,8 @@
         "calla lily": "Calla Lily",
         "daffodil": "Daffodil",
         "daisy": "Daisy",
-        "lily of the valley": "Lily of the Valley"
+        "lily of the valley": "Lily of the Valley",
+        "bouquet": "Bouquet"
     },
     "Profile": {
         "profileDetails": "Profile Details",

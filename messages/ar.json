@@ -176,7 +176,8 @@
             "pampas": "بامبز",
             "peony": "عود الصليب",
             "calla lily": "زنبق الكالا",
-            "daffodil": "نرجس"
+            "daffodil": "نرجس",
+            "bouquet": "باقة"
         },
         "form": {
             "addNewProduct": "إضافة منتج جديد",
@@ -263,7 +264,8 @@
         "calla lily": "زنبق الكالا",
         "daffodil": "نرجس",
         "daisy": "أقحوان",
-        "lily of the valley": "زهرة الوادي"
+        "lily of the valley": "زهرة الوادي",
+        "bouquet": "باقة"
     },
     "Profile": {
         "profileDetails": "تفاصيل الملف الشخصي",
